@@ -1,17 +1,23 @@
+#[derive(Copy, Clone)]
 struct Point {
     x: i32,
     y: i32,
 }
 
+#[derive(Copy, Clone)]
 struct Line {
     p1: Point,
     p2: Point,
 }
 
 fn to_sect(input: &str, cur: &mut Point) -> Line {
-    let from = *cur;
-    let len = String::from_utf8(input.as_bytes()[1..3].to_vec()).unwrap().parse::<i32>().unwrap();
-    
+    let from = cur.clone();
+
+    let len = String::from_utf8(input.as_bytes()[1..].to_vec())
+        .unwrap()
+        .parse::<i32>()
+        .unwrap();
+
     match input.chars().nth(0).unwrap() {
         'L' => cur.x -= len,
         'R' => cur.x += len,
@@ -19,13 +25,13 @@ fn to_sect(input: &str, cur: &mut Point) -> Line {
         'D' => cur.y -= len,
         _ => assert!(false),
     }
-    
-    return Line {p1: from, p2: *cur};
+
+    return Line { p1: from, p2: cur.clone() };
 }
 
 fn to_sections(input: &[&str]) -> Vec<Line> {
     let mut res = Vec::new();
-    let mut cur = Point {x:0,y:0};
+    let mut cur = Point { x: 0, y: 0 };
     for c in input {
         res.push(to_sect(c, &mut cur));
     }
@@ -96,5 +102,8 @@ fn main() {
 
     let sects1 = to_sections(&w1);
     let sects2 = to_sections(&w2);
+    
+    for i in sects1 {
+        print!("{}:{}-{}:{}, ", i.p1.x, i.p1.y, i.p2.x, i.p2.y);
+    }    
 }
-
