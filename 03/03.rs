@@ -1,3 +1,6 @@
+use core::cmp::{max, min};
+use num::abs;
+
 #[derive(Copy, Clone)]
 struct Point {
     x: i32,
@@ -26,7 +29,10 @@ fn to_sect(input: &str, cur: &mut Point) -> Line {
         _ => assert!(false),
     }
 
-    return Line { p1: from, p2: cur.clone() };
+    return Line {
+        p1: from,
+        p2: cur.clone(),
+    };
 }
 
 fn to_sections(input: &[&str]) -> Vec<Line> {
@@ -36,6 +42,34 @@ fn to_sections(input: &[&str]) -> Vec<Line> {
         res.push(to_sect(c, &mut cur));
     }
     return res;
+}
+
+fn find_intersection(l1: &Line, l2: &Line) -> i32 {
+    if l1.p1.x == l1.p2.x && l2.p1.x == l2.p2.x { // ||
+         //assert!(l1.p1.x != l2.p1.x); // not implemented
+    } else if l1.p1.y == l1.p2.y && l2.p1.y == l2.p2.y { // - -
+         //assert!(l1.p1.y != l2.p1.y); // not implemented
+    } else if l1.p1.x == l1.p2.x && l2.p1.y == l2.p2.y {
+        // |-
+        if min(l2.p1.x, l2.p2.x) <= l1.p1.x
+            && l1.p1.x <= max(l2.p1.x, l2.p2.x)
+            && min(l1.p1.y, l1.p2.y) <= l2.p1.y
+            && l2.p1.y <= max(l1.p1.y, l1.p2.y)
+        {
+            return abs(l1.p1.x) + abs(l2.p1.y);
+        }
+    } else if l1.p1.y == l1.p2.y && l2.p1.x == l2.p2.x {
+        // -|
+        if min(l1.p1.x, l1.p2.x) <= l2.p1.x
+            && l2.p1.x <= max(l1.p1.x, l1.p2.x)
+            && min(l2.p1.y, l2.p2.y) <= l1.p1.y
+            && l1.p1.y <= max(l2.p1.y, l2.p2.y)
+        {
+            return abs(l2.p1.x) + abs(l1.p1.y);
+        }
+    }
+
+    return std::i32::MAX;
 }
 
 fn main() {
@@ -102,8 +136,16 @@ fn main() {
 
     let sects1 = to_sections(&w1);
     let sects2 = to_sections(&w2);
-    
-    for i in sects1 {
+
+    for i in &sects1 {
         print!("{}:{}-{}:{}, ", i.p1.x, i.p1.y, i.p2.x, i.p2.y);
-    }    
+    }
+
+    let mut res = std::i32::MAX;
+    for s1 in &sects1 {
+        for s2 in &sects2 {
+            res = core::cmp::min(res, find_intersection(&s1, &s2))
+        }
+    }
+    println!("\n{}", res);
 }
