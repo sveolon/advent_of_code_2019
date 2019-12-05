@@ -1,6 +1,7 @@
-use std::io::{stdin,stdout,Write};
+use std::io::{stdin, stdout, Write};
 
 fn main() {
+    let dbg = false;
     let mut a : [i32; 678] = [
         3, 225, 1, 225, 6, 6, 1100, 1, 238, 225, 104, 0, 101, 71, 150, 224, 101, -123, 224, 224, 4,
         224, 102, 8, 223, 223, 101, 2, 224, 224, 1, 224, 223, 223, 2, 205, 209, 224, 1001, 224,
@@ -39,36 +40,57 @@ fn main() {
         223, 223, 1007, 226, 677, 224, 102, 2, 223, 223, 1005, 224, 659, 101, 1, 223, 223, 108,
         226, 677, 224, 102, 2, 223, 223, 1006, 224, 674, 101, 1, 223, 223, 4, 223, 99, 226,
     ];
+    //let mut a: [i32; 5] = [1101,100,-1,4,0];
     let mut i = 0;
     loop {
+        if dbg {
+            print!("\n{}: ", i);
+            for x in a.iter() {
+                print!("{}, ", x);
+            }
+            print!("\n\n");
+        }
         let op = a[i] % 100;
+        if dbg {
+            println!("op={}", op);
+        }
+
         if op == 99 {
             break;
         }
-        
+
         if op == 3 {
             a[a[i + 1] as usize] = 1; //hard coded
             i += 2;
             continue;
         }
 
-        let a1 = if a[i] / 100 / 10 > 0 {
+        let a1 = if a[i] % 1000 / 100 == 0 {
             a[a[i + 1] as usize]
         } else {
             a[i + 1]
         };
-        
+        if dbg {
+            println!("a1={}", a1);
+        }
+
         if op == 4 {
             print!("{}, ", a1);
             i += 2;
             continue;
         }
 
-        let a2 = if a[i] / 1000 / 100 > 0 {
+        if dbg {
+            println!("{}, {}, {}", i, a[i], a[i] / 1000 / 100);
+        }
+        let a2 = if a[i] % 10000 / 1000 == 0 {
             a[a[i + 2] as usize]
         } else {
             a[i + 2]
         };
+        if dbg {
+            println!("a2={}", a2);
+        }
 
         if op == 1 {
             a[a[i + 3] as usize] = a1 + a2;
@@ -78,7 +100,11 @@ fn main() {
         }
         i += 4;
     }
-    /*for x in a.iter() {
-        print!("{}, ", x);
-    }*/
+    if dbg {
+        print!("\n{}: ", i);
+        for x in a.iter() {
+            print!("{}, ", x);
+        }
+        print!("\n\n");
+    }
 }
