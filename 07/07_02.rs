@@ -1,6 +1,7 @@
 //fn int_comp(a: &mut [i32; 29], input1: i32, input2: i32, halted: &mut bool) -> i32 {
-fn int_comp(a: & mut [i32; 29], input1: i32, halted: &mut bool, i: &mut usize) -> i32 {
+fn int_comp(a: & mut [i32; 515], input1: i32, input2: i32, halted: &mut bool, i: &mut usize) -> i32 {
     let mut output = std::i32::MAX;
+    let mut inp1_used = false;
     loop {
         let op = a[*i] % 100;
 
@@ -10,7 +11,8 @@ fn int_comp(a: & mut [i32; 29], input1: i32, halted: &mut bool, i: &mut usize) -
         }
 
         if op == 3 {
-            a[a[*i + 1] as usize] = input1;
+            a[a[*i + 1] as usize] = if !inp1_used {input1} else {input2};
+            inp1_used = true;
             *i += 2;
             continue;
         }
@@ -99,7 +101,7 @@ fn heap_permutation(a: &mut [usize; 5], size: usize, output: &mut Vec<[usize; 5]
 
 fn main() {
     //let a = [3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0];
-    /*let a = [
+    let a = [
         3, 8, 1001, 8, 10, 8, 105, 1, 0, 0, 21, 46, 59, 84, 93, 110, 191, 272, 353, 434, 99999, 3,
         9, 101, 2, 9, 9, 102, 3, 9, 9, 1001, 9, 5, 9, 102, 4, 9, 9, 1001, 9, 4, 9, 4, 9, 99, 3, 9,
         101, 3, 9, 9, 102, 5, 9, 9, 4, 9, 99, 3, 9, 1001, 9, 4, 9, 1002, 9, 2, 9, 101, 2, 9, 9,
@@ -120,8 +122,8 @@ fn main() {
         2, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9,
         3, 9, 1002, 9, 2, 9, 4, 9, 3, 9, 101, 2, 9, 9, 4, 9, 3, 9, 1002, 9, 2, 9, 4, 9, 3, 9, 1001,
         9, 2, 9, 4, 9, 99,
-    ];*/
-    let a = [3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5];
+    ];
+    //let a = [3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5];
 
     let mut setting1 = [5,6,7,8,9];
     let mut all_permutations = Vec::new();
@@ -133,13 +135,14 @@ fn main() {
         let mut amps = [a, a, a, a, a];
         let mut output = 0;
         let mut halted = false;
+        
         for i in 0..5 {
-            output = int_comp(& mut amps[i], setting[i] as i32, &mut halted, &mut is[i]);
+            output = int_comp(& mut amps[i], setting[i] as i32, output, &mut halted, &mut is[i]);
             if halted { break; }
         }
         loop {
             for i in 0..5 {
-                output = int_comp(& mut amps[i], output, &mut halted, &mut is[i]);
+                output = int_comp(& mut amps[i], output, output, &mut halted, &mut is[i]);
                 if halted { break; }
             }
             if halted { break; }
