@@ -53,12 +53,13 @@ fn zeros(size: usize) -> Vec<i64> {
     return zero_vec;
 }
 
-fn int_comp(arr: Vec<i64>) -> i64 {
+fn int_comp(arr: Vec<i64>) -> HashMap<(i64,i64),i64> {
     let mut a = arr;
     let mut i = 0;
     let mut output_num = 0;
     let mut painted = HashMap::new();
     let mut curr = (0, 0);
+    painted.insert(curr, 1);
     let mut dir = Dir::Up;
 
     let mut rb: i64 = 0;
@@ -158,7 +159,7 @@ fn int_comp(arr: Vec<i64>) -> i64 {
             i += 4;
         }
     }
-    return painted.len() as i64;
+    return painted;
 }
 
 fn main() {
@@ -168,6 +169,42 @@ fn main() {
         arr[i] = a[i];
     }
     let result = int_comp(arr);
-    println!("\n{}", result);
+    println!("res {}", result.len());
     
+    let mut min_x = 0;
+    let mut max_x = 0;
+    let mut min_y = 0;
+    let mut max_y = 0;
+    for (k,_v) in result.iter() {
+        min_x = std::cmp::min(min_x, k.0);
+        max_x = std::cmp::max(max_x, k.0);
+        min_y = std::cmp::min(min_y, k.1);
+        max_y = std::cmp::max(max_y, k.1);
+    }
+    
+    let width: usize = (max_x - min_x + 1) as usize;
+    let height: usize = (max_y - min_y + 1) as usize;
+    println!("{} by {}", width, height);
+    
+    // Base 1d array
+    let mut grid_raw = vec![' '; width * height];
+
+    // Vector of 'width' elements slices
+    let mut grid_base: Vec<_> = grid_raw.as_mut_slice().chunks_mut(width).collect();
+
+    // Final 2d array
+    let grid: &mut [&mut [_]] = grid_base.as_mut_slice();
+    
+    for (k,v) in result.iter() {
+        if *v == 0 { continue; }
+        let x = (k.0 - min_x) as usize;
+        let y = (k.1 - min_y) as usize;
+        grid[y][x] = '*';
+    }
+    for y in 0..height {
+        for x in 0..width {
+            print!("{}", grid[height - y -1][x]);
+        }
+        print!("\n");
+    }
 }
