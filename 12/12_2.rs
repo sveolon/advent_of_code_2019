@@ -36,10 +36,13 @@ fn main() {
     
     //print_matrix("coords", &coords);
     //print_matrix("velos", &velos);
+    let mut coords_counts = [0,0,0];
+    let mut velos_counts = [0,0,0];
     
     let mut ind = 0;
     loop {
-        if ind > 0 && velos == velos_orig && coords == coords_orig {break;}
+        if ind > 10000 { break; } 
+        //if ind > 0 && velos == velos_orig && coords == coords_orig {break;}
         
         for l in 0..4 {
             for r in l..4 {
@@ -65,9 +68,31 @@ fn main() {
                 coords[l][i] += velos[l][i];
             }
         }
+        
+        for i in 0..3 {
+            let mut num_vels = 0;
+            let mut num_coords = 0;
+            for l in 0..4 {
+                if velos[l][i] == velos_orig[l][i] {
+                    num_vels += 1;
+                }
+                if coords[l][i] == coords_orig[l][i] {
+                    num_coords += 1;
+                }
+            }
+            if num_vels == 4 && velos_counts[i] == 0 {
+                velos_counts[i] = ind;
+            }
+            if num_coords == 4 && coords_counts[i] == 0 {
+                coords_counts[i] = ind;
+            }
+        }
+        
         ind += 1;
     }
     
+    println!("velos_counts: {} {} {}", velos_counts[0], velos_counts[1], velos_counts[2]);
+    println!("coords_counts: {} {} {}", coords_counts[0], coords_counts[1], coords_counts[2]);
     
     println!("result: {}", ind);
 }
