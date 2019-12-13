@@ -85,7 +85,7 @@ fn main() {
 
     use num::integer::lcm;
 
-    let mut result = lcm(coords_counts[0]+1, coords_counts[1]+1);
-    result = lcm(result, coords_counts[2]+1);
+    let mut result = lcm(coords_counts[0] as u64 + 1, coords_counts[1] as u64 +1);
+    result = lcm(result, coords_counts[2] as u64 + 1);
     println!("result: {}", result);
 }
