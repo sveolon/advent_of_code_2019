@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-fn parse_pair(pair: &str) -> (i32, &str) {
+fn parse_pair(pair: &str) -> (u32, &str) {
     let split = pair.split(" ").collect::<Vec<&str>>();
-    let outcount = split[0].parse::<i32>().unwrap();
+    let outcount = split[0].parse::<u32>().unwrap();
     return (outcount, split[1].into());
 }
 
@@ -11,7 +11,7 @@ fn in_and_out(all: &str) -> (&str, &str) {
     return (vec[0], vec[1]);
 }
 
-fn parse_ins(inputs: &str) -> Vec<(i32, &str)> {
+fn parse_ins(inputs: &str) -> Vec<(u32, &str)> {
     let mut res = Vec::new();
     let in_split = inputs.split(", ").collect::<Vec<&str>>();
     for ins in &in_split {
@@ -20,11 +20,31 @@ fn parse_ins(inputs: &str) -> Vec<(i32, &str)> {
     return res;
 }
 
-fn parse_line(line: &str) -> (&str, (i32, std::vec::Vec<(i32, &str)>)) {
+fn parse_line(line: &str) -> (&str, (u32, std::vec::Vec<(u32, &str)>)) {
     let vec = in_and_out(line);
     let outsplit = parse_pair(vec.1);
     let inputs = parse_ins(vec.0);
     return (outsplit.1, (outsplit.0, inputs));
+}
+
+fn calculate(
+    material: &str,
+    count: u32,
+    recepies: &HashMap<&str, (u32, std::vec::Vec<(u32, &str)>)>,
+) -> u32 {
+
+    println!("calculate {} {}", count, material);
+    
+    if material == "ORE" {
+        return count;
+    }
+    
+    let mut result = 0;
+    for comp in &recepies[material].1 {
+        result += calculate(comp.1, comp.0, recepies);
+    }
+    
+    return (count/recepies[material].0 + 1) * result;
 }
 
 fn main() {
@@ -41,5 +61,7 @@ fn main() {
         let res = parse_line(s);
         recepies.insert(res.0, res.1);
     }
-    println!("# {}", recepies.len());
+    
+    let result = calculate("FUEL", 1, &recepies);
+    println!("result {}", result);
 }
