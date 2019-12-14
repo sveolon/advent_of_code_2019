@@ -29,24 +29,49 @@ fn parse_line(line: &str) -> (&str, (u32, std::vec::Vec<(u32, &str)>)) {
 
 fn calculate(
     material: &str,
-    count: u32,
+    cnt: u32,
     recepies: &HashMap<&str, (u32, std::vec::Vec<(u32, &str)>)>,
+    extras: &mut HashMap<String, u32>
 ) -> u32 {
 
-    println!("calculate {} {}", count, material);
+    let mut count = cnt;
+    
+    //println!("calculate {} {}", count, material);
     
     if material == "ORE" {
         return count;
     }
     
-    let mut result = 0;
-    for comp in &recepies[material].1 {
-        result += calculate(comp.1, comp.0, recepies);
+    if extras.contains_key(material) && extras[material] > 0 {
+        if count <= extras[material] {
+            *extras.get_mut(material).unwrap() -= count;
+            return 0;
+        } else {
+            count -= extras[material];
+            *extras.get_mut(material).unwrap() = 0;
+        }
     }
+    
+    let per_reaction = recepies[material].0;
+    let needed = count;
+    let num_reactions = if per_reaction > needed { 1 } else { 
+    (needed as f64 /per_reaction as f64).ceil() as u32 };
+    let to_produce = num_reactions * per_reaction;
+    
+    let mut total = 0;
+    for comp in &recepies[material].1 {
+        total += calculate(comp.1, comp.0 * num_reactions, recepies, extras);
+    }
+    let excess = to_produce - needed;
 
-    let result = (count as f64 /recepies[material].0 as f64).ceil() as u32 * result;
-    println!("calculate {} {} => {}", count, material, result);
-    return result;
+    if extras.contains_key(material) {
+        *extras.get_mut(material).unwrap() += excess;    
+    } else {
+        extras.insert(material.to_string(), excess);
+    }
+    
+    //println!("calculate {} {} => {}", count, material, result);
+    return total;
 }
 
 fn main() {
@@ -66,12 +91,13 @@ fn main() {
         "7 A, 1 D => 1 E",
         "3 B => 1 FUEL",
     ];*/
+    let mut extras = HashMap::new();
     let mut recepies = HashMap::new();
     for s in &ss {
         let res = parse_line(s);
         recepies.insert(res.0, res.1);
     }
     
-    let result = calculate("FUEL", 1, &recepies);
+    let result = calculate("FUEL", 1, &recepies, &mut extras);
     println!("result {}", result);
 }
