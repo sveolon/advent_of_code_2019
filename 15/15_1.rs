@@ -1,4 +1,4 @@
-//use std::collections::HashMap;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
@@ -159,51 +159,86 @@ fn main() {
     // ((x,y), arr, direction, num_steps, i, rb)
     queue.push_front(((0, 0), arr, 0, 0, 0, 0));
 
-    let num_steps;
-    
-    loop {
+    let mut num_steps = 0;
+
+    let mut min_x = 0;
+    let mut max_x = 0;
+    let mut min_y = 0;
+    let mut max_y = 0;
+    let mut known = HashMap::new();
+
+    while queue.len() > 0 {
         let curr = queue.pop_back().unwrap();
         visited.insert(curr.0);
 
         let mut array = curr.1;
         let mut i = curr.4;
         let mut rb = curr.5;
-            
+
         let res = if 1 <= curr.2 && curr.2 <= 4 {
             int_comp(&mut array, curr.2, &mut i, &mut rb)
         } else {
             1
         };
 
+        known.insert(
+            curr.0,
+            match res {
+                0 => '#',
+                1 => '.',
+                2 => 'O',
+                _ => '?',
+            },
+        );
+
         if res == 2 {
             num_steps = curr.3;
-            break;
+            continue;
         }
-        
+
         if res == 0 {
             continue;
         }
-        
+
         let x = (curr.0).0;
         let y = (curr.0).1;
+
+        min_x = std::cmp::min(min_x, x);
+        max_x = std::cmp::max(max_x, x);
+        min_y = std::cmp::min(min_y, y);
+        max_y = std::cmp::max(max_y, y);
+
         let num_steps = curr.3 + 1;
         // north (1), south (2), west (3), and east (4)
-        if !visited.contains(&(x, y+1)) {
+        if !visited.contains(&(x, y + 1)) {
             let a = array.clone();
-            queue.push_front(((x, y+1), a, 1, num_steps, i, rb));
+            queue.push_front(((x, y + 1), a, 1, num_steps, i, rb));
         }
-        if !visited.contains(&(x, y-1)) {
+        if !visited.contains(&(x, y - 1)) {
             let a = array.clone();
-            queue.push_front(((x, y-1), a, 2, num_steps, i, rb));
+            queue.push_front(((x, y - 1), a, 2, num_steps, i, rb));
         }
-        if !visited.contains(&(x-1, y)) {
+        if !visited.contains(&(x - 1, y)) {
             let a = array.clone();
-            queue.push_front(((x-1, y), a, 3, num_steps, i, rb));
+            queue.push_front(((x - 1, y), a, 3, num_steps, i, rb));
         }
-        if !visited.contains(&(x+1, y)) {
+        if !visited.contains(&(x + 1, y)) {
             let a = array.clone();
-            queue.push_front(((x+1, y), a, 4, num_steps, i, rb));
-        }        
+            queue.push_front(((x + 1, y), a, 4, num_steps, i, rb));
+        }
     }
     println!("num_steps: {}", num_steps);
+
+    for y in min_y-1..max_y + 2 {
+        for x in min_x-1..max_x + 2 {
+            if x == 0 && y == 0 {
+               print!("!"); 
+            } else if known.contains_key(&(x, y)) {
+                print!("{}", known[&(x, y)]);
+            } else {
+                print!("?");
+            }
+        }
+        print!("\n");
+    }
 }
