@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 use std::collections::HashSet;
+use std::collections::HashMap;
 
 fn zeros(size: usize) -> Vec<i64> {
     let mut zero_vec: Vec<i64> = Vec::with_capacity(size as usize);
@@ -9,7 +10,7 @@ fn zeros(size: usize) -> Vec<i64> {
     return zero_vec;
 }
 
-fn int_comp(arr: Vec<i64>, input1: i64) -> i64 {
+fn int_comp(arr: Vec<i64>) -> i64 {
     let mut a = arr;
     let mut i = 0;
     let mut output = std::i64::MAX;
@@ -25,7 +26,13 @@ fn int_comp(arr: Vec<i64>, input1: i64) -> i64 {
     queue.push_front((3, (-1,0), 1));
     queue.push_front((4, (1,0), 1));
     
-    loop {
+    let mut min_x = 0;
+    let mut max_x = 0;
+    let mut min_y = 0;
+    let mut max_y = 0;
+    let mut known = HashMap::new();
+    
+    for _i in 0..100000 {
         let op = a[i] % 100;
 
         if op == 99 {
@@ -56,7 +63,11 @@ fn int_comp(arr: Vec<i64>, input1: i64) -> i64 {
         if op == 3 {
             curr = queue.pop_back().unwrap();
             visited.insert(curr.1);
-            println!("trying {} {}", (curr.1).0, (curr.1).1);
+            min_x = std::cmp::min(min_x, (curr.1).0);
+            max_x = std::cmp::max(max_x, (curr.1).0);
+            min_y = std::cmp::min(min_y, (curr.1).1);
+            max_y = std::cmp::max(max_y, (curr.1).1);
+            //println!("trying ({}, {})", (curr.1).0, (curr.1).1);
             
             a[ind1] = curr.0;
             i += 2;
@@ -68,15 +79,18 @@ fn int_comp(arr: Vec<i64>, input1: i64) -> i64 {
                 
         if op == 4 {
             output = a1;
+            
             if output == 2 {
                 println!("2 for {} {}", (curr.1).0, (curr.1).1);
                 println!("!!!!!! result {},", curr.2);
+                known.insert(curr.1, '2');
                 break;
             } else if output == 0 {
-                println!("0 for {} {}", (curr.1).0, (curr.1).1);
-                continue;
+                known.insert(curr.1, '#');
+                //println!("0 for {} {}", (curr.1).0, (curr.1).1);
             } else {
-                println!("1 for {} {}", (curr.1).0, (curr.1).1);
+                known.insert(curr.1, '.');
+                //println!("1 for {} {}", (curr.1).0, (curr.1).1);
 
                 //north (1), south (2), west (3), and east (4)
                 let x = (curr.1).0;
@@ -137,6 +151,17 @@ fn int_comp(arr: Vec<i64>, input1: i64) -> i64 {
             i += 4;
         }
     }
+    
+    for y in min_y..max_y+1 {
+        for x in min_x..max_x+1 {
+            if known.contains_key(&(x,y)) {
+                print!("{}", known[&(x,y)]);
+            } else {
+                print!("?");
+            }
+        }
+        print!("\n");
+    }
     return output;
 }
 
@@ -146,7 +171,7 @@ fn main() {
     for i in 0..a.len() {
         arr[i] = a[i];
     }
-    /*let result = */int_comp(arr, 1);
+    let result = int_comp(arr);
 
-    //println!("\nresult: {}", result);
+    println!("\nresult: {}", result);
 }
