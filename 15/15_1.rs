@@ -166,6 +166,7 @@ fn main() {
     let mut min_y = 0;
     let mut max_y = 0;
     let mut known = HashMap::new();
+    let mut oxigen = (0,0);
 
     while queue.len() > 0 {
         let curr = queue.pop_back().unwrap();
@@ -193,6 +194,7 @@ fn main() {
 
         if res == 2 {
             num_steps = curr.3;
+            oxigen = curr.0;
             continue;
         }
 
@@ -227,7 +229,7 @@ fn main() {
             queue.push_front(((x + 1, y), a, 4, num_steps, i, rb));
         }
     }
-    println!("num_steps: {}", num_steps);
+    println!("num_steps: {}, oxigen location ({}, {})", num_steps, oxigen.0, oxigen.1);
 
     for y in min_y-1..max_y + 2 {
         for x in min_x-1..max_x + 2 {
