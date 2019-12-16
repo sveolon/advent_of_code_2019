@@ -26,7 +26,7 @@ fn main() {
     
     for _phase in 0..100 {
         let mut out = VecDeque::new();
-        println!("phase {}", _phase);
+        //println!("phase {}", _phase);
         let mut r = 0;
         for i in 0..input.len() {
             let j = input.len() - i - 1;
@@ -38,7 +38,7 @@ fn main() {
         input = out;
     }
     print!("\n");
-    for d in 0..9 {
+    for d in 0..8 {
         print!("{}", input[d]);
     }
 }
