@@ -1,20 +1,12 @@
 use std::vec::Vec;
 
-fn gen_phase(phase: usize, len: usize) -> Vec<u64> {
+fn gen_phase(phase: usize, len: usize) -> Vec<i64> {
     let mut res = Vec::new();
-    let elems = [0,1,0,-1];
-    if phase == 1 {
-        let mut e = 0;
-        for i in 1..len+1 {
-            e += 1;
-            res.push_back(elems[e%4]);
-        }
-    } else  {
-        let mut e = 0;
-        for i in 1..len+1 {
-            if i%phase == 0 { e+= 1; }
-        
-        }
+    let elems: [i64; 4] = [-1,0,1,0];
+    let mut e = 0;
+    for i in 0..len {
+        if i%phase == 0 { e+= 1; }
+        res.push(elems[e%4]);
     }
     return res;
 }
@@ -26,10 +18,26 @@ fn main() {
         let d = c as i64 - '0' as i64;
         input.push(d);
     }
-    for d in input {
+    for d in &input {
         print!("{}", d);
     }
-    for phase in 1..101 {
-        let ph = gen_phase(phase, input.len());
+    
+    for phase in 0..100 {
+        let mut out = Vec::new();
+        for i in 1..input.len()+1 {
+            let ph = gen_phase(i, input.len()+1);
+            let mut r = 0;
+            for j in 0..input.len() {
+                r += input[j] * ph[j+1];
+            }
+            r = num::abs(r);
+            r = r % 10;
+            out.push(r);
+        }
+        input = out;
+    }
+    print!("\n");
+    for d in &input {
+        print!("{}", d);
     }
 }
