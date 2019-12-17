@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 fn zeros(size: usize) -> Vec<i64> {
     let mut zero_vec: Vec<i64> = Vec::with_capacity(size as usize);
     for _i in 0..size {
@@ -6,10 +8,16 @@ fn zeros(size: usize) -> Vec<i64> {
     return zero_vec;
 }
 
-fn int_comp(arr: Vec<i64>, input1: i64) -> i64 {
+fn int_comp(arr: Vec<i64>, input1: i64) -> (HashSet<(i64,i64)>, (i64,i64), (i64,i64)) {
     let mut a = arr;
     let mut i = 0;
-    let mut output = std::i64::MAX;
+    let mut output; // = std::i64::MAX;
+    
+    let mut blocks = HashSet::new();
+    let mut x = 0;
+    let mut y = 0;
+    let mut curr = (0, 0);
+    let mut maxs = (0, 0);
 
     let mut rb: i64 = 0;
     loop {
@@ -51,7 +59,15 @@ fn int_comp(arr: Vec<i64>, input1: i64) -> i64 {
                 
         if op == 4 {
             output = a1;
-            print!("{}", (output as u8) as char);                
+            print!("{}", (output as u8) as char);
+            match output {
+                35 => { blocks.insert((x,y)); x += 1; },
+                46 => { x += 1; },
+                10 => { y += 1; x = 0; },
+                _ =>  { blocks.insert((x,y)); x += 1; curr.0 = x; curr.1 = y },
+            }
+            maxs.0 = std::cmp::max(maxs.0, x);
+            maxs.1 = std::cmp::max(maxs.1, y);
 
             i += 2;
             continue;
@@ -94,7 +110,7 @@ fn int_comp(arr: Vec<i64>, input1: i64) -> i64 {
             i += 4;
         }
     }
-    return output;
+    return (blocks, curr, maxs);
 }
 
 fn main() {
@@ -104,7 +120,36 @@ fn main() {
     for i in 0..a.len() {
         arr[i] = a[i];
     }
-    /*let result = */int_comp(arr, 1);
+    
+    let (blocks, _curr, maxs) = int_comp(arr, 1);
 
-    //println!("\nresult: {}", result);
+    println!("\n!!!!!!!!!!!!!");
+    
+    for y in 0..maxs.1+1 {
+        for x in 0..maxs.0+1 {
+            if 
+            blocks.contains(&(x,y)) {
+                print!("#");
+            } else {
+                print!(".");
+            }
+        }
+        print!("\n");
+    }
+
+    let mut result = 0;
+    for y in 0..maxs.1+1 {
+        for x in 0..maxs.0+1 {
+            if 
+            blocks.contains(&(x,y)) &&
+            blocks.contains(&(x+1,y)) &&
+            blocks.contains(&(x-1,y)) &&
+            blocks.contains(&(x,y+1)) &&
+            blocks.contains(&(x,y-1)) {
+                result += x * y;
+            }
+        }
+    }
+
+    println!("\nresult: {}", result);
 }
