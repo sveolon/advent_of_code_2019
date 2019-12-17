@@ -236,8 +236,8 @@ fn main() {
     }
     arr2[0] = 2;
     
-    let inp = "A,B,C,B,A,C\nL,6,R,8\nR,4,R,4,R,8\nL,6,L,2\ny\n";
-    
+    let inp = "A,B,A,B,C\nL,6,R,12,L,6,R,12\nL,10,L,4,L,6\nL,6,R,12\ny\n";
+    //L,6,R,12,L,6,R,12,L,10,L,4,L,6,L,6
     let mut input = Vec::new();
     for c in inp.chars() {
         input.push((c as u8) as i64);
