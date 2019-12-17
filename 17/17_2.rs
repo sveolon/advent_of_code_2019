@@ -59,7 +59,7 @@ fn int_comp(arr: Vec<i64>, input1: i64) -> (HashSet<(i64,i64)>, (i64,i64), (i64,
                 
         if op == 4 {
             output = a1;
-            print!("{}", (output as u8) as char);
+            //print!("{}", (output as u8) as char);
             match output {
                 35 => { blocks.insert((x,y)); x += 1; },
                 46 => { x += 1; },
@@ -236,8 +236,14 @@ fn main() {
     }
     arr2[0] = 2;
     
-    let inp = "A,B,A,B,C\nL,6,R,12,L,6,R,12\nL,10,L,4,L,6\nL,6,R,12\ny\n";
-    //L,6,R,12,L,6,R,12,L,10,L,4,L,6,L,6
+    let inp = "\
+A,B,A,B,A,C,B,C,A,C
+L,6,R,12,L,6
+R,12,L,10,L,4,L,6
+L,10,L,10,L,4,L,6
+n
+";
+
     let mut input = Vec::new();
     for c in inp.chars() {
         input.push((c as u8) as i64);
