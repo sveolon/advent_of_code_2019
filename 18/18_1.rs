@@ -118,45 +118,56 @@ fn main() {
     } 
     
     /*for y in 0..max_y {
-        print!("\n");
-        for x in 0..max_x {
-            if doors_inv.contains_key(&(x,y)) {
-                print!("{}", doors_inv[&(x,y)]);
-            } else if keys_inv.contains_key(&(x,y)) {
-                print!("{}", keys_inv[&(x,y)]);
-            } else if curr.0 == x && curr.1 == y {
-                print!("@");
-            } else if passages.contains(&(x,y)) {
-                print!(".");
-            } else {
-                print!("#");
-            }
-        }*/
+    print!("\n");
+    for x in 0..max_x {
+        if doors_inv.contains_key(&(x,y)) {
+            print!("{}", doors_inv[&(x,y)]);
+        } else if keys_inv.contains_key(&(x,y)) {
+            print!("{}", keys_inv[&(x,y)]);
+        } else if curr.0 == x && curr.1 == y {
+            print!("@");
+        } else if passages.contains(&(x,y)) {
+            print!(".");
+        } else {
+            print!("#");
+        }
+    }*/
         
-        let mut queue = VecDeque::new();
-        let found_keys = HashSet::new();
-        let found_doors = HashSet::new();
+    let mut queue = VecDeque::new();
+    let found_keys = HashSet::new();
+    let found_doors = HashSet::new();
 
-        queue.push_front(curr, 0, found_keys, found_doors);
-        /*while queue.len() > 0 {
-            let ((x,y), steps, found_keys, found_doors) = queue.pop_back();
-            
-            if (keys_inv.contains_key(&(x,y))) {
-                found_keys.insert(keys_inv[&(x,y)])
+    queue.push_front((curr, 0, found_keys, found_doors));
+    while queue.len() > 0 {
+        let ((x,y), steps, mut found_keys, mut found_doors) = queue.pop_back().unwrap();
+        
+        if keys_inv.contains_key(&(x,y)) {
+            found_keys.insert(keys_inv[&(x,y)]);
+        }
+        if doors_inv.contains_key(&(x,y)) {
+            let key = (doors_inv[&(x,y)] as u8 - 'A' as u8 + 'a' as u8) as char;
+            if found_keys.contains(&key) {
+                found_doors.insert(key);
+            } else {
+                continue;
             }
-            if doors_inv.contains_key(&(x,y)) {
-                let key = doors_inv[&(x,y)].to_lower();
-                if found_keys.contain(key) {
-                    found_doors.insert(key);
-                } else {
-                    continue;
-                }
-            }
-            if found_doors == doors.len() {
-                println!("result: {}", steps);
-                return;
-            }
-        }*/
+        }
+        if found_doors.len() == doors.len() {
+            println!("result: {}", steps);
+            return;
+        }
+        
+        if passages.contains(&(x,y+1)) {
+            queue.push_front(((x,y+1), steps+1, found_keys.clone(), found_doors.clone()));
+        }
+        if passages.contains(&(x,y-1)) {
+            queue.push_front(((x,y-1), steps+1, found_keys.clone(), found_doors.clone()));
+        }
+        if passages.contains(&(x+1,y)) {
+            queue.push_front(((x+1,y), steps+1, found_keys.clone(), found_doors.clone()));
+        }
+        if passages.contains(&(x-1,y)) {
+            queue.push_front(((x-1,y), steps+1, found_keys.clone(), found_doors.clone()));
+        }
     }
-    
 }
