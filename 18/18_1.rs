@@ -136,38 +136,44 @@ fn main() {
     let mut queue = VecDeque::new();
     let found_keys = HashSet::new();
     let found_doors = HashSet::new();
+    let mut visited = HashSet::new();
 
-    queue.push_front((curr, 0, found_keys, found_doors));
+    visited.insert(curr);
+    queue.push_front((curr, 0, found_keys, found_doors, visited));
     while queue.len() > 0 {
-        let ((x,y), steps, mut found_keys, mut found_doors) = queue.pop_back().unwrap();
+        let ((x,y), steps, mut found_keys, mut found_doors, mut visited) = queue.pop_back().unwrap();
         
         if keys_inv.contains_key(&(x,y)) {
             found_keys.insert(keys_inv[&(x,y)]);
+            visited.clear();
         }
         if doors_inv.contains_key(&(x,y)) {
             let key = (doors_inv[&(x,y)] as u8 - 'A' as u8 + 'a' as u8) as char;
             if found_keys.contains(&key) {
                 found_doors.insert(key);
+                visited.clear();
             } else {
                 continue;
             }
         }
+        visited.insert((x,y));
+        
         if found_doors.len() == doors.len() {
             println!("result: {}", steps);
             return;
         }
         
-        if passages.contains(&(x,y+1)) {
-            queue.push_front(((x,y+1), steps+1, found_keys.clone(), found_doors.clone()));
+        if !visited.contains(&(x,y+1)) && passages.contains(&(x,y+1)) {
+            queue.push_front(((x,y+1), steps+1, found_keys.clone(), found_doors.clone(), visited.clone()));
         }
-        if passages.contains(&(x,y-1)) {
-            queue.push_front(((x,y-1), steps+1, found_keys.clone(), found_doors.clone()));
+        if !visited.contains(&(x,y-1)) && passages.contains(&(x,y-1)) {
+            queue.push_front(((x,y-1), steps+1, found_keys.clone(), found_doors.clone(), visited.clone()));
         }
-        if passages.contains(&(x+1,y)) {
-            queue.push_front(((x+1,y), steps+1, found_keys.clone(), found_doors.clone()));
+        if !visited.contains(&(x+1,y)) && passages.contains(&(x+1,y)) {
+            queue.push_front(((x+1,y), steps+1, found_keys.clone(), found_doors.clone(), visited.clone()));
         }
-        if passages.contains(&(x-1,y)) {
-            queue.push_front(((x-1,y), steps+1, found_keys.clone(), found_doors.clone()));
+        if !visited.contains(&(x-1,y)) && passages.contains(&(x-1,y)) {
+            queue.push_front(((x-1,y), steps+1, found_keys.clone(), found_doors.clone(), visited.clone()));
         }
     }
 }
