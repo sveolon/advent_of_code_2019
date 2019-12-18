@@ -140,16 +140,21 @@ fn main() {
 
     visited.insert(curr);
     queue.push_front((curr, 0, found_keys, found_doors, visited));
+    let mut i = 0;
     while queue.len() > 0 {
+        if i % 10000 == 0 {
+            print!("q: {}; ", queue.len());
+        }
+        i += 1; 
         let ((x,y), steps, mut found_keys, mut found_doors, mut visited) = queue.pop_back().unwrap();
         
-        if keys_inv.contains_key(&(x,y)) {
+        if keys_inv.contains_key(&(x,y)) && !found_keys.contains(&keys_inv[&(x,y)]) {
             found_keys.insert(keys_inv[&(x,y)]);
             visited.clear();
         }
         if doors_inv.contains_key(&(x,y)) {
             let key = (doors_inv[&(x,y)] as u8 - 'A' as u8 + 'a' as u8) as char;
-            if found_keys.contains(&key) {
+            if found_keys.contains(&key) && !found_doors.contains(&key) {
                 found_doors.insert(key);
                 visited.clear();
             } else {
