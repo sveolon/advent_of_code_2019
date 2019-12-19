@@ -26,7 +26,7 @@ impl PartialOrd for State {
 }
 
 fn main() {
-    let a = [
+    let _aa = [
         "#################################################################################",
         "#...#p........#..k........#.K..f........#...#.........#...........#.....#.......#",
         "#.#V#.#######.#P#########.#.#########.###.#.#######.###.###.#####.#.###.#.#####Y#",
@@ -110,6 +110,15 @@ fn main() {
         "#################################################################################",
     ];
 
+    let _a = ["#########", "#b.A.@.a#", "#########"];
+    let a = [
+        "########################",
+        "#f.D.E.e.C.b.A.@.a.B.c.#",
+        "######################.#",
+        "#d.....................#",
+        "########################",
+    ];
+
     let max_y: usize = a.len();
     let max_x: usize = a[0].len();
 
@@ -140,21 +149,31 @@ fn main() {
         }
     }
 
-    /*for y in 0..max_y {
-    print!("\n");
+    print!("\n\t");
     for x in 0..max_x {
-        if doors_inv.contains_key(&(x,y)) {
-            print!("{}", doors_inv[&(x,y)]);
-        } else if keys_inv.contains_key(&(x,y)) {
-            print!("{}", keys_inv[&(x,y)]);
-        } else if curr.0 == x && curr.1 == y {
-            print!("@");
-        } else if passages.contains(&(x,y)) {
-            print!(".");
-        } else {
-            print!("#");
+        print!("{}", x / 10);
+    }
+    print!("\n\t");
+    for x in 0..max_x {
+        print!("{}", x % 10);
+    }
+    for y in 0..max_y {
+        print!("\n{}\t", y);
+        for x in 0..max_x {
+            if doors_inv.contains_key(&(x, y)) {
+                print!("{}", doors_inv[&(x, y)]);
+            } else if keys_inv.contains_key(&(x, y)) {
+                print!("{}", keys_inv[&(x, y)]);
+            } else if curr.0 == x && curr.1 == y {
+                print!("@");
+            } else if passages.contains(&(x, y)) {
+                print!(".");
+            } else {
+                print!("#");
+            }
         }
-    }*/
+    }
+    print!("\n\n");
 
     let mut queue = BinaryHeap::new();
     let found_keys = HashSet::new();
@@ -171,31 +190,55 @@ fn main() {
     });
     let mut i = 0;
     while queue.len() > 0 {
-        if i % 10000 == 0 {
-            print!("q: {}; ", queue.len());
+        if i % 10 == 0 {
+            //println!("q: {}; ", queue.len());
         }
         i += 1;
+
         let mut state = queue.pop().unwrap();
         let x = state.pos.0;
         let y = state.pos.1;
 
-        if keys_inv.contains_key(&(x, y)) && !state.found_keys.contains(&keys_inv[&(x, y)]) {
-            state.found_keys.insert(keys_inv[&(x, y)]);
-            state.visited.clear();
-        }
-        if doors_inv.contains_key(&(x, y)) {
+        if keys_inv.contains_key(&(x, y)) {
+            let key = &keys_inv[&(x, y)];
+            if state.found_keys.contains(key) {
+                // skip
+            } else {
+                state.found_keys.insert(*key);
+                state.visited.clear();
+                state.visited.insert((x, y));
+            }
+        } else if doors_inv.contains_key(&(x, y)) {
             let key = (doors_inv[&(x, y)] as u8 - 'A' as u8 + 'a' as u8) as char;
             if state.found_keys.contains(&key) && !state.found_doors.contains(&key) {
                 state.found_doors.insert(key);
                 state.visited.clear();
+                state.visited.insert((x, y));
             } else {
-                continue;
+                state.visited.insert((x, y));
+                continue; // treat as a wall for now
             }
         }
         state.visited.insert((x, y));
 
-        if state.found_doors.len() == doors.len() {
-            println!("result: {}", state.steps);
+        if state.found_keys.len() == keys.len() {
+            println!(
+                "result: {} ({} == {})",
+                state.steps,
+                state.found_keys.len(),
+                keys.len()
+            );
+        println!(
+            "{}) ({}, {}): s {}, v {}, k {}, d {}, q {}",
+            i,
+            x,
+            y,
+            state.steps,
+            state.visited.len(),
+            state.found_keys.len(),
+            state.found_doors.len(),
+            queue.len()
+        );
             return;
         }
 
@@ -235,5 +278,17 @@ fn main() {
                 visited: state.visited.clone(),
             });
         }
+        
+        println!(
+            "{}) ({}, {}): s {}, v {}, k {}, d {}, q {}",
+            i,
+            x,
+            y,
+            state.steps,
+            state.visited.len(),
+            state.found_keys.len(),
+            state.found_doors.len(),
+            queue.len()
+        );
     }
 }
