@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
+use std::collections::VecDeque;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::usize;
@@ -11,6 +12,7 @@ struct State {
     found_keys: HashSet<char>,
     found_doors: HashSet<char>,
     visited: HashSet<(usize, usize)>,
+    path: Vec<(usize, usize)>
 }
 
 impl Ord for State {
@@ -26,7 +28,7 @@ impl PartialOrd for State {
 }
 
 fn main() {
-    let _aa = [
+    let a = [
         "#################################################################################",
         "#...#p........#..k........#.K..f........#...#.........#...........#.....#.......#",
         "#.#V#.#######.#P#########.#.#########.###.#.#######.###.###.#####.#.###.#.#####Y#",
@@ -111,7 +113,7 @@ fn main() {
     ];
 
     let _a = ["#########", "#b.A.@.a#", "#########"];
-    let a = [
+    let __a = [
         "########################",
         "#f.D.E.e.C.b.A.@.a.B.c.#",
         "######################.#",
@@ -149,7 +151,7 @@ fn main() {
         }
     }
 
-    print!("\n\t");
+    /*print!("\n\t");
     for x in 0..max_x {
         print!("{}", x / 10);
     }
@@ -173,20 +175,22 @@ fn main() {
             }
         }
     }
-    print!("\n\n");
+    print!("\n\n");*/
 
-    let mut queue = BinaryHeap::new();
+    //let mut queue = BinaryHeap::new();
+    let mut queue = VecDeque::new();
     let found_keys = HashSet::new();
     let found_doors = HashSet::new();
     let mut visited = HashSet::new();
 
     visited.insert(curr);
-    queue.push(State {
+    queue.push_front(State {
         pos: curr,
         steps: 0,
         found_keys: found_keys,
         found_doors: found_doors,
         visited: visited,
+        path: vec![(curr.0, curr.1)]
     });
     let mut i = 0;
     while queue.len() > 0 {
@@ -195,27 +199,36 @@ fn main() {
         }
         i += 1;
 
-        let mut state = queue.pop().unwrap();
+        let mut state = queue.pop_front().unwrap();
         let x = state.pos.0;
         let y = state.pos.1;
+        
+        //println!("pop ({} {})", x, y);
 
         if keys_inv.contains_key(&(x, y)) {
             let key = &keys_inv[&(x, y)];
             if state.found_keys.contains(key) {
                 // skip
+                //println!("v1 ({} {})", x, y);
             } else {
                 state.found_keys.insert(*key);
                 state.visited.clear();
-                state.visited.insert((x, y));
+                //println!("v2 ({} {})", x, y);
             }
         } else if doors_inv.contains_key(&(x, y)) {
             let key = (doors_inv[&(x, y)] as u8 - 'A' as u8 + 'a' as u8) as char;
-            if state.found_keys.contains(&key) && !state.found_doors.contains(&key) {
-                state.found_doors.insert(key);
-                state.visited.clear();
-                state.visited.insert((x, y));
+            if state.found_keys.contains(&key) {
+                if !state.found_doors.contains(&key) {
+                    state.found_doors.insert(key);
+                    state.visited.clear();
+                    //println!("v3 ({} {})", x, y);
+                } else {
+                    // skip
+                    //println!("v5 ({} {})", x, y);
+                }
             } else {
                 state.visited.insert((x, y));
+                //println!("v4 ({} {})", x, y);
                 continue; // treat as a wall for now
             }
         }
@@ -228,67 +241,61 @@ fn main() {
                 state.found_keys.len(),
                 keys.len()
             );
-        println!(
-            "{}) ({}, {}): s {}, v {}, k {}, d {}, q {}",
-            i,
-            x,
-            y,
-            state.steps,
-            state.visited.len(),
-            state.found_keys.len(),
-            state.found_doors.len(),
-            queue.len()
-        );
             return;
         }
 
         if !state.visited.contains(&(x, y + 1)) && passages.contains(&(x, y + 1)) {
-            queue.push(State {
+            //println!("adding ({} {})", x, y + 1);
+            let mut path = state.path.clone();
+            path.push((x, y + 1));
+            queue.push_back(State {
                 pos: (x, y + 1),
                 steps: state.steps + 1,
                 found_keys: state.found_keys.clone(),
                 found_doors: state.found_doors.clone(),
                 visited: state.visited.clone(),
+                path: path
             });
         }
         if !state.visited.contains(&(x, y - 1)) && passages.contains(&(x, y - 1)) {
-            queue.push(State {
+            //println!("adding ({} {})", x, y - 1);
+            let mut path = state.path.clone();
+            path.push((x, y -1));
+            queue.push_back(State {
                 pos: (x, y - 1),
                 steps: state.steps + 1,
                 found_keys: state.found_keys.clone(),
                 found_doors: state.found_doors.clone(),
                 visited: state.visited.clone(),
+                path: path
             });
         }
+        
         if !state.visited.contains(&(x + 1, y)) && passages.contains(&(x + 1, y)) {
-            queue.push(State {
+            //println!("adding ({} {})", x + 1, y);
+            let mut path = state.path.clone();
+            path.push((x + 1, y));
+            queue.push_back(State {
                 pos: (x + 1, y),
                 steps: state.steps + 1,
                 found_keys: state.found_keys.clone(),
                 found_doors: state.found_doors.clone(),
                 visited: state.visited.clone(),
+                path: path
             });
         }
         if !state.visited.contains(&(x - 1, y)) && passages.contains(&(x - 1, y)) {
-            queue.push(State {
+            //println!("adding ({} {})", x - 1, y);
+            let mut path = state.path.clone();
+            path.push((x - 1, y));
+            queue.push_back(State {
                 pos: (x - 1, y),
                 steps: state.steps + 1,
                 found_keys: state.found_keys.clone(),
                 found_doors: state.found_doors.clone(),
                 visited: state.visited.clone(),
+                path: path
             });
         }
-        
-        println!(
-            "{}) ({}, {}): s {}, v {}, k {}, d {}, q {}",
-            i,
-            x,
-            y,
-            state.steps,
-            state.visited.len(),
-            state.found_keys.len(),
-            state.found_doors.len(),
-            queue.len()
-        );
     }
 }
