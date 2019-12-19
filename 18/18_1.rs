@@ -200,6 +200,9 @@ fn main() {
     });
     let mut i = 0;
     while queue.len() > 0 {
+        let mut should_ret = false;
+        let mut should_cont = false;
+        
         if i % 10 == 0 {
             //println!("q: {}; ", queue.len());
         }
@@ -211,33 +214,33 @@ fn main() {
         
         //println!("pop ({} {})", x, y);
 
-        if keys_inv.contains_key(&(x, y)) {
+        if keys_inv.contains_key(&(x, y)) {  // it's a key
             let key = &keys_inv[&(x, y)];
-            if state.found_keys.contains(key) {
+            if state.found_keys.contains(key) { // already have this key
                 // skip
                 //println!("v1 ({} {})", x, y);
-            } else {
+            } else { // didn't have this key
                 state.found_keys.insert(*key);
                 state.visited.clear();
                 //println!("v2 ({} {})", x, y);
             }
-        } else if doors_inv.contains_key(&(x, y)) {
+        } else if doors_inv.contains_key(&(x, y)) { // it's a door
             let key = (doors_inv[&(x, y)] as u8 - 'A' as u8 + 'a' as u8) as char;
-            if state.found_keys.contains(&key) {
-                if !state.found_doors.contains(&key) {
+            
+            if state.found_doors.contains(&key) { // already opened
+                // skip
+            } else { // closed door
+                if state.found_keys.contains(&key) { // we have a key
                     state.found_doors.insert(key);
                     state.visited.clear();
-                    //println!("v3 ({} {})", x, y);
-                } else {
-                    // skip
-                    //println!("v5 ({} {})", x, y);
+                } else { // locked and no key - treat as a wall for now
+                    should_cont = true;
+                    state.visited.insert((x, y));
+                    continue; 
                 }
-            } else {
-                state.visited.insert((x, y));
-                //println!("v4 ({} {})", x, y);
-                continue; // treat as a wall for now
             }
         }
+        
         state.visited.insert((x, y));
 
         if state.found_keys.len() == keys.len() {
@@ -247,6 +250,7 @@ fn main() {
                 state.found_keys.len(),
                 keys.len()
             );
+            should_ret = true;
             return;
         }
 
