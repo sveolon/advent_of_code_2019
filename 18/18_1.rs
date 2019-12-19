@@ -30,35 +30,40 @@ fn clear_path_to_door(
     from: (usize, usize),
     to: (usize, usize),
     passages: &HashSet<(usize, usize)>,
-    visited: &mut HashSet<(usize, usize)>)
-    {
-        let mut q = VecDeque::new();
-        let p = vec![from];
-        let v = HashSet::new();
-        q.push_front((from, p, v));
-        
-        while q.len() > 0 {
-        
-            let mut c = q.pop_back().unwrap();
-            if c.2.contains(&(c.0)) { continue; }
-            c.2.insert(c.0);
-            c.1.push(c.0);
-            
-            if c.0 == to {
-                for p in c.1 {
-                    visited.remove(&p);
-                }
-                return;
+    visited: &mut HashSet<(usize, usize)>,
+) {
+    let mut q = VecDeque::new();
+    let p = vec![from];
+    let v = HashSet::new();
+    q.push_front((from, p, v));
+
+    while q.len() > 0 {
+        let mut c = q.pop_back().unwrap();
+        if c.2.contains(&(c.0)) {
+            continue;
+        }
+        c.2.insert(c.0);
+        c.1.push(c.0);
+
+        if c.0 == to {
+            for p in c.1 {
+                visited.remove(&p);
             }
-            let nexts = vec![((c.0).0, (c.0).1+1), ((c.0).0, (c.0).1-1), ((c.0).0+1, (c.0).1), ((c.0).0-1, (c.0).1)];
-            for n in nexts {
-                if passages.contains(&n) {
-                    q.push_front((n, c.1.clone(), (c.2).clone()))
-                }
+            return;
+        }
+        let nexts = vec![
+            ((c.0).0, (c.0).1 + 1),
+            ((c.0).0, (c.0).1 - 1),
+            ((c.0).0 + 1, (c.0).1),
+            ((c.0).0 - 1, (c.0).1),
+        ];
+        for n in nexts {
+            if passages.contains(&n) {
+                q.push_front((n, c.1.clone(), (c.2).clone()))
             }
         }
     }
-
+}
 
 fn main() {
     let _a = [
@@ -146,7 +151,7 @@ fn main() {
     ];
 
     //let _a = ["#########", "#b.A.@.a#", "#########"];
-    let a = [
+    let _a3 = [
         "#################",
         "#i.G..c...e..H.p#",
         "########.########",
@@ -156,6 +161,24 @@ fn main() {
         "########.########",
         "#l.F..d...h..C.m#",
         "#################",
+    ];
+    let _a1 = ["#########", "#b.A.@.a#", "#########"];
+
+    let _a2 = [
+        "########################",
+        "#f.D.E.e.C.b.A.@.a.B.c.#",
+        "######################.#",
+        "#d.....................#",
+        "########################",
+    ];
+
+    let a = [
+        "########################",
+        "#@..............ac.GI.b#",
+        "###d#e#f################",
+        "###A#B#C################",
+        "###g#h#i################",
+        "########################",
     ];
 
     let max_y: usize = a.len();
@@ -268,7 +291,7 @@ fn main() {
             if state.found_keys.contains(&key) {
                 // we have a key
                 state.path.push(doors_inv[&(x, y)]);
-                //state.visited.clear();
+            //state.visited.clear();
             } else {
                 // locked and no key - treat as a wall for now
                 should_cont = true;
@@ -336,10 +359,11 @@ fn main() {
                 });
             }
         }
-        
+
         /*print!("\n");
         for v in &state.path {
             print!("{},", v);
         }*/
+        if should_ret { return; }
     }
 }
