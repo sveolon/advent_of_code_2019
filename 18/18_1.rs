@@ -1,68 +1,15 @@
-use std::cmp::Ordering;
-use std::collections::BinaryHeap;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
-use std::usize;
 
-#[derive(Clone, Eq, PartialEq)]
-struct State {
-    pos: (usize, usize),
-    steps: usize,
-    found_keys: HashSet<char>,
-    visited: HashSet<(usize, usize)>,
-    path: Vec<char>,
+fn has_key (mask: i32, key: char) -> bool {
+    let shift = (key as u8) - ('a' as u8);
+    return mask & (1 << shift) != 0;
 }
 
-impl Ord for State {
-    fn cmp(&self, other: &State) -> Ordering {
-        other.steps.cmp(&self.steps)
-    }
-}
-
-impl PartialOrd for State {
-    fn partial_cmp(&self, other: &State) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-fn clear_path_to_door(
-    from: (usize, usize),
-    to: (usize, usize),
-    passages: &HashSet<(usize, usize)>,
-    visited: &mut HashSet<(usize, usize)>,
-) {
-    let mut q = VecDeque::new();
-    let p = vec![from];
-    let v = HashSet::new();
-    q.push_front((from, p, v));
-
-    while q.len() > 0 {
-        let mut c = q.pop_back().unwrap();
-        if c.2.contains(&(c.0)) {
-            continue;
-        }
-        c.2.insert(c.0);
-        c.1.push(c.0);
-
-        if c.0 == to {
-            for p in c.1 {
-                visited.remove(&p);
-            }
-            return;
-        }
-        let nexts = vec![
-            ((c.0).0, (c.0).1 + 1),
-            ((c.0).0, (c.0).1 - 1),
-            ((c.0).0 + 1, (c.0).1),
-            ((c.0).0 - 1, (c.0).1),
-        ];
-        for n in nexts {
-            if passages.contains(&n) {
-                q.push_front((n, c.1.clone(), (c.2).clone()))
-            }
-        }
-    }
+fn add_key (mask: &mut i32, key: char){
+    let shift = (key as u8) - ('a' as u8);
+    *mask |= 1 << shift;
 }
 
 fn main() {
@@ -150,7 +97,16 @@ fn main() {
         "#################################################################################",
     ];
 
-    //let _a = ["#########", "#b.A.@.a#", "#########"];
+    let a = ["#########", "#b.A.@.a#", "#########"];
+
+    let _a2 = [
+        "########################",
+        "#f.D.E.e.C.b.A.@.a.B.c.#",
+        "######################.#",
+        "#d.....................#",
+        "########################",
+    ];
+
     let _a3 = [
         "#################",
         "#i.G..c...e..H.p#",
@@ -162,17 +118,8 @@ fn main() {
         "#l.F..d...h..C.m#",
         "#################",
     ];
-    let _a1 = ["#########", "#b.A.@.a#", "#########"];
 
-    let _a2 = [
-        "########################",
-        "#f.D.E.e.C.b.A.@.a.B.c.#",
-        "######################.#",
-        "#d.....................#",
-        "########################",
-    ];
-
-    let a = [
+    let _a4 = [
         "########################",
         "#@..............ac.GI.b#",
         "###d#e#f################",
@@ -205,165 +152,81 @@ fn main() {
                 keys.insert(c, (x, y));
                 keys_inv.insert((x, y), c);
             } else if 'A' <= c && c <= 'Z' {
-                doors.insert(c, (x, y));
-                doors_inv.insert((x, y), c);
+                let key = (c as u8 - 'A' as u8 + 'a' as u8) as char;
+                doors.insert(key, (x, y));
+                doors_inv.insert((x, y), key);
             }
         }
     }
 
-    print!("\n\t");
-    for x in 0..max_x {
-        print!("{}", x / 10);
-    }
-    print!("\n\t");
-    for x in 0..max_x {
-        print!("{}", x % 10);
-    }
-    for y in 0..max_y {
-        print!("\n{}\t", y);
+    {
+        print!("\n\t");
         for x in 0..max_x {
-            if doors_inv.contains_key(&(x, y)) {
-                print!("{}", doors_inv[&(x, y)]);
-            } else if keys_inv.contains_key(&(x, y)) {
-                print!("{}", keys_inv[&(x, y)]);
-            } else if curr.0 == x && curr.1 == y {
-                print!("@");
-            } else if passages.contains(&(x, y)) {
-                print!(".");
-            } else {
-                print!("#");
-            }
+            print!("{}", x / 10);
         }
-    }
-    print!("\n\n");
-
-    let mut queue = BinaryHeap::new();
-    //let mut queue = VecDeque::new();
-    let found_keys = HashSet::new();
-    let mut visited = HashSet::new();
-
-    visited.insert(curr);
-    //queue.push_front(State {
-    queue.push(State {
-        pos: curr,
-        steps: 0,
-        found_keys: found_keys,
-        visited: visited,
-        path: vec!['@'],
-    });
-    let mut i = 0;
-    while queue.len() > 0 {
-        let mut should_ret = false;
-        let mut should_cont = false;
-
-        if i % 10 == 0 {
-            //println!("q: {}; ", queue.len());
+        print!("\n\t");
+        for x in 0..max_x {
+            print!("{}", x % 10);
         }
-        i += 1;
-
-        //let mut state = queue.pop_front().unwrap();
-        let mut state = queue.pop().unwrap();
-        let x = state.pos.0;
-        let y = state.pos.1;
-
-        //println!("pop ({} {})", x, y);
-
-        if keys_inv.contains_key(&(x, y)) {
-            // it's a key
-            let key = &keys_inv[&(x, y)];
-            if state.found_keys.contains(key) { // already have this key
-                 // skip
-            } else {
-                // didn't have this key
-                state.found_keys.insert(*key);
-                //state.visited.clear();
-                let key_big = (*key as u8 - 'a' as u8 + 'A' as u8) as char;
-                if doors.contains_key(&key_big) {
-                    clear_path_to_door((x, y), doors[&key_big], &passages, &mut state.visited);
+        for y in 0..max_y {
+            print!("\n{}\t", y);
+            for x in 0..max_x {
+                if doors_inv.contains_key(&(x, y)) {
+                    print!("{}", doors_inv[&(x, y)]);
+                } else if keys_inv.contains_key(&(x, y)) {
+                    print!("{}", keys_inv[&(x, y)]);
+                } else if curr.0 == x && curr.1 == y {
+                    print!("@");
+                } else if passages.contains(&(x, y)) {
+                    print!(".");
+                } else {
+                    print!("#");
                 }
-                state.path.push(*key);
             }
-        } else if doors_inv.contains_key(&(x, y)) {
-            // it's a door
-            let key = (doors_inv[&(x, y)] as u8 - 'A' as u8 + 'a' as u8) as char;
+        }
+        print!("\n\n");
+    }
 
-            // closed door
-            if state.found_keys.contains(&key) {
-                // we have a key
-                state.path.push(doors_inv[&(x, y)]);
-            //state.visited.clear();
-            } else {
-                // locked and no key - treat as a wall for now
-                should_cont = true;
-                state.visited.insert((x, y));
+    let mut all_keys = 0;
+    for k in &keys {
+        add_key(&mut all_keys, *k.0);
+    }
+    println!("all keys: {}", all_keys);
+    
+    let mut queue = VecDeque::new();
+    let mut visited = HashSet::new();
+    visited.insert((curr,0));
+    
+    queue.push_front((curr, 0, 0));
+    
+    while queue.len() > 0 {
+    
+        let mut s = queue.pop_back().unwrap();
+        if visited.contains(&(s.0, s.2)) {
+            continue;
+        }
+        visited.insert((s.0, s.2));
+        
+        if keys_inv.contains_key(&s.0) { // it's a key
+            add_key(& mut s.2, keys_inv[&s.0]);
+        } else if doors_inv.contains_key(&s.0) { // it's a door
+            let key = doors_inv[&s.0];
+            if !has_key(s.2, key) {             // closed door
                 continue;
             }
         }
 
-        state.visited.insert((x, y));
-
-        if state.found_keys.len() == keys.len() {
-            println!(
-                "result: {} ({} == {})",
-                state.steps,
-                state.found_keys.len(),
-                keys.len()
-            );
-            should_ret = true;
+        if s.2 == all_keys {
+            println!("result: {}", s.1);
+            return;
         }
 
-        if !should_ret && !should_cont {
-            if !state.visited.contains(&(x, y + 1)) && passages.contains(&(x, y + 1)) {
-                //println!("adding ({} {})", x, y + 1);
-                //queue.push_back(State {
-                queue.push(State {
-                    pos: (x, y + 1),
-                    steps: state.steps + 1,
-                    found_keys: state.found_keys.clone(),
-                    visited: state.visited.clone(),
-                    path: state.path.clone(),
-                });
-            }
-            if !state.visited.contains(&(x, y - 1)) && passages.contains(&(x, y - 1)) {
-                //println!("adding ({} {})", x, y - 1);
-                //queue.push_back(State {
-                queue.push(State {
-                    pos: (x, y - 1),
-                    steps: state.steps + 1,
-                    found_keys: state.found_keys.clone(),
-                    visited: state.visited.clone(),
-                    path: state.path.clone(),
-                });
-            }
-
-            if !state.visited.contains(&(x + 1, y)) && passages.contains(&(x + 1, y)) {
-                //println!("adding ({} {})", x + 1, y);
-                //queue.push_back(State {
-                queue.push(State {
-                    pos: (x + 1, y),
-                    steps: state.steps + 1,
-                    found_keys: state.found_keys.clone(),
-                    visited: state.visited.clone(),
-                    path: state.path.clone(),
-                });
-            }
-            if !state.visited.contains(&(x - 1, y)) && passages.contains(&(x - 1, y)) {
-                //println!("adding ({} {})", x - 1, y);
-                //queue.push_back(State {
-                queue.push(State {
-                    pos: (x - 1, y),
-                    steps: state.steps + 1,
-                    found_keys: state.found_keys.clone(),
-                    visited: state.visited.clone(),
-                    path: state.path.clone(),
-                });
-            }
+        let flood: Vec<(i32,i32)> = vec![(0,1),(0,-1),(1,0),(-1,0)];
+        
+        for f in &flood {
+            let x = ((s.0).0 as i32 + f.0) as usize;
+            let y = ((s.0).1 as i32 + f.1) as usize;
+            queue.push_front(((x,y), s.1 + 1, s.2));
         }
-
-        /*print!("\n");
-        for v in &state.path {
-            print!("{},", v);
-        }*/
-        if should_ret { return; }
     }
 }
