@@ -12,6 +12,15 @@ fn add_key(mask: &mut i32, key: char) {
     *mask |= 1 << shift;
 }
 
+fn to_key(cs: &Vec<(usize,usize)>, v: i32) -> String {
+    let mut res = String::from("");
+    for &c in cs {
+        res = format!("{},({},{})", res, c.0, c.1);
+    }
+    res = format!("{}; {}", res, v);
+    return res;
+}
+
 fn main() {
     let a = [
         "#################################################################################",
@@ -196,23 +205,23 @@ fn main() {
     let mut queue = VecDeque::new();
     let mut visited = HashSet::new();
 
-    let mut curr_2 = Vec::new();
+    let mut curr = Vec::new();
     for va in vaults {
-        curr_2.push(va);
+        curr.push(va);
     }
-    let curr = (curr_2[0],curr_2[1],curr_2[2],curr_2[3]);
 
     queue.push_front((curr, 0, 0));
 
     while queue.len() > 0 {
         let (cs, s, mut v) = queue.pop_back().unwrap();
         
-        if visited.contains(&(cs, v)) {
+        let skey = to_key(&cs, v);
+        if visited.contains(&skey) {
             continue;
         }
-        visited.insert((cs.clone(), &v));
+        visited.insert(skey);
 
-        let invalid = false;
+        let mut invalid = false;
         for c in &cs {
             if keys_inv.contains_key(&c) {
                 // it's a key
