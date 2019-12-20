@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
-fn has_key (mask: i32, key: char) -> bool {
+fn has_key (mask: & i32, key: char) -> bool {
     let shift = (key as u8) - ('a' as u8);
     return mask & (1 << shift) != 0;
 }
@@ -99,7 +99,7 @@ fn main() {
 
     let _a1 = ["#########", "#b.A.@.a#", "#########"];
 
-    let _a2 = [
+    let a = [
         "########################",
         "#f.D.E.e.C.b.A.@.a.B.c.#",
         "######################.#",
@@ -107,7 +107,7 @@ fn main() {
         "########################",
     ];
 
-    let a = [
+    let _a3 = [
         "#################",
         "#i.G..c...e..H.p#",
         "########.########",
@@ -200,35 +200,32 @@ fn main() {
     
     while queue.len() > 0 {
     
-        let mut s = queue.pop_back().unwrap();
-        if visited.contains(&(s.0, s.2)) {
+        let (c,s, mut v) = queue.pop_back().unwrap();
+        if visited.contains(&(c,v)) {
             continue;
         }
-        visited.insert((s.0, s.2));
+        visited.insert((c, v));
         
-        if keys_inv.contains_key(&s.0) { // it's a key
-            add_key(& mut s.2, keys_inv[&s.0]);
-        } else if doors_inv.contains_key(&s.0) { // it's a door
-            let key = doors_inv[&s.0];
-            if !has_key(s.2, key) {             // closed door
-                continue;
-            }
+        if keys_inv.contains_key(&c) { // it's a key
+            add_key(& mut v, keys_inv[&c]);
+        } else if doors_inv.contains_key(&c) && !has_key(&v, doors_inv[&c]) {
+            continue;
         }
 
-        if s.2 == all_keys {
-            println!("result: {}", s.1);
+        if v == all_keys {
+            println!("result: {}", s);
             return;
         }
 
         let flood: Vec<(i32,i32)> = vec![(0,1),(0,-1),(1,0),(-1,0)];
         
         for f in &flood {
-            let x = ((s.0).0 as i32 + f.0) as usize;
-            let y = ((s.0).1 as i32 + f.1) as usize;
-            queue.push_front(((x,y), s.1 + 1, s.2));
+            let x = (c.0 as i32 + f.0) as usize;
+            let y = (c.1 as i32 + f.1) as usize;
+            if x == 0 || x > max_x || y == 0 || y > max_y { continue; }
+            queue.push_front(((x,y), s + 1, v));
         }
     }
-    
     for v in visited {
         println!("v {} {} {}", (v.0).0, (v.0).1, v.1);
     }
