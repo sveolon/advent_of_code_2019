@@ -12,13 +12,49 @@ fn add_key(mask: &mut i32, key: char) {
     *mask |= 1 << shift;
 }
 
-fn to_key(cs: &Vec<(usize, usize)>, v: i32) -> String {
-    let mut res = String::from("");
-    for &c in cs {
-        res = format!("{},({},{})", res, c.0, c.1);
+fn solve(
+    curr: &(usize, usize),
+    keys_inv: &HashMap<(usize, usize), char>,
+    doors_inv: &HashMap<(usize, usize), char>,
+    passages: &HashSet<(usize, usize)>,
+    all_keys: i32,
+) -> usize {
+    let mut queue = VecDeque::new();
+    let mut visited = HashSet::new();
+
+    queue.push_front((*curr, 0, 0));
+
+    while queue.len() > 0 {
+        let (c, s, mut v) = queue.pop_back().unwrap();
+        if visited.contains(&(c, v)) {
+            continue;
+        }
+        visited.insert((c, v));
+
+        if keys_inv.contains_key(&c) {
+            // it's a key
+            add_key(&mut v, keys_inv[&c]);
+        } else if doors_inv.contains_key(&c) && !has_key(&v, doors_inv[&c]) {
+            continue;
+        }
+
+        if v == all_keys {
+            return s;
+        }
+
+        let flood: Vec<(i32, i32)> = vec![(0, 1), (0, -1), (1, 0), (-1, 0)];
+
+        for f in &flood {
+            let x = (c.0 as i32 + f.0) as usize;
+            let y = (c.1 as i32 + f.1) as usize;
+            //if x == 0 || x > max_x || y == 0 || y > max_y { continue; }
+            if !passages.contains(&(x, y)) {
+                continue;
+            }
+            queue.push_front(((x, y), s + 1, v));
+        }
     }
-    res = format!("{}; {}", res, v);
-    return res;
+    return 0;
 }
 
 fn main() {
@@ -106,42 +142,6 @@ fn main() {
         "#################################################################################",
     ];
 
-    let _a1 = [
-        "#######", "#a.#Cd#", "##@#@##", "#######", "##@#@##", "#cB#.b#", "#######",
-    ];
-
-    let _a2 = [
-        "###############",
-        "#d.ABC.#.....a#",
-        "######@#@######",
-        "###############",
-        "######@#@######",
-        "#b.....#.....c#",
-        "###############",
-    ];
-
-    let _a3 = [
-        "#############",
-        "#DcBa.#.GhKl#",
-        "#.###@#@#I###",
-        "#e#d#####j#k#",
-        "###C#@#@###J#",
-        "#fEbA.#.FgHi#",
-        "#############",
-    ];
-
-    let _a4 = [
-        "#############",
-        "#g#f.D#..h#l#",
-        "#F###e#E###.#",
-        "#dCba@#@BcIJ#",
-        "#############",
-        "#nK.L@#@G...#",
-        "#M###N#H###.#",
-        "#o#m..#i#jk.#",
-        "#############",
-    ];
-
     let max_y: usize = a.len();
     let max_x: usize = a[0].len();
 
@@ -150,7 +150,7 @@ fn main() {
     let mut doors_inv = HashMap::new();
     let mut keys = HashMap::new();
     let mut keys_inv = HashMap::new();
-    let mut vaults = HashSet::new();
+    let mut curr = HashSet::new();
 
     for y in 0..max_y {
         for x in 0..max_x {
@@ -161,7 +161,7 @@ fn main() {
             }
             passages.insert((x, y));
             if c == '@' {
-                vaults.insert((x, y));
+                curr.insert((x,y));
             } else if 'a' <= c && c <= 'z' {
                 keys.insert(c, (x, y));
                 keys_inv.insert((x, y), c);
@@ -189,7 +189,7 @@ fn main() {
                     print!("{}", doors_inv[&(x, y)]);
                 } else if keys_inv.contains_key(&(x, y)) {
                     print!("{}", keys_inv[&(x, y)]);
-                } else if vaults.contains(&(x, y)) {
+                } else if curr.contains(&(x,y)) {
                     print!("@");
                 } else if passages.contains(&(x, y)) {
                     print!(".");
@@ -201,67 +201,15 @@ fn main() {
         print!("\n\n");
     }
 
-    let mut all_keys = 0;
-    for k in &keys {
-        add_key(&mut all_keys, *k.0);
+    let mut result = 0;
+    for c in &curr {
+        let mut all_keys = 0;
+        for k in &keys {
+            add_key(&mut all_keys, *k.0);
+        }
+        println!("all keys: {}", all_keys);
+        
+        result += solve(&c, &keys_inv, &doors_inv, &passages, all_keys);
     }
-    println!("all keys: {}", all_keys);
-
-    let mut queue = VecDeque::new();
-    let mut visited = HashSet::new();
-
-    let mut curr = Vec::new();
-    for va in vaults {
-        curr.push(va);
-    }
-
-    queue.push_front((curr, 0, 0));
-
-    while queue.len() > 0 {
-        let (cs, s, mut v) = queue.pop_back().unwrap();
-
-        let skey = to_key(&cs, v);
-        if visited.contains(&skey) {
-            continue;
-        }
-        visited.insert(skey);
-
-        let mut invalid = false;
-        for c in &cs {
-            if keys_inv.contains_key(&c) {
-                // it's a key
-                add_key(&mut v, keys_inv[&c]);
-            } else if doors_inv.contains_key(&c) && !has_key(&v, doors_inv[&c]) {
-                invalid = true;
-            }
-        }
-        if invalid {
-            continue;
-        }
-
-        if v == all_keys {
-            println!("result: {}", s);
-            return;
-        }
-
-        let flood: Vec<(i32, i32)> = vec![(0, 1), (0, -1), (1, 0), (-1, 0)];
-
-        for i in 0..cs.len() {
-            for f in &flood {
-                let x = (cs[i].0 as i32 + f.0) as usize;
-                let y = (cs[i].1 as i32 + f.1) as usize;
-                if x == 0 || x > max_x || y == 0 || y > max_y {
-                    continue;
-                }
-                if !passages.contains(&(x, y)) {
-                    continue;
-                }
-
-                let mut cr = cs.clone();
-                cr[i].0 = x;
-                cr[i].1 = y;
-                queue.push_front((cr, s + 1, v));
-            }
-        }
-    }
+    println!("result: {}", result);
 }
