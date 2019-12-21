@@ -34,7 +34,10 @@ fn solve(
         if keys_inv.contains_key(&c) {
             // it's a key
             add_key(&mut v, keys_inv[&c]);
-        } else if doors_inv.contains_key(&c) && !has_key(&v, doors_inv[&c]) {
+        } else if doors_inv.contains_key(&c)
+            && has_key(&all_keys, doors_inv[&c])
+            && !has_key(&v, doors_inv[&c])
+        {
             continue;
         }
 
@@ -55,6 +58,44 @@ fn solve(
         }
     }
     return 0;
+}
+
+fn prune(
+    curr: &(usize, usize),
+    keys_inv: &HashMap<(usize, usize), char>,
+    passages: &HashSet<(usize, usize)>,
+) -> (HashMap<(usize, usize), char>, i32) {
+    let mut found_keys = HashMap::new();
+    let mut visited = HashSet::new();
+    let mut queue = VecDeque::new();
+    let mut all_keys = 0;
+    queue.push_front(*curr);
+
+    while queue.len() > 0 {
+        let c = queue.pop_back().unwrap();
+        if visited.contains(&c) {
+            continue;
+        }
+        visited.insert(c);
+
+        if keys_inv.contains_key(&c) {
+            add_key(&mut all_keys, keys_inv[&c]);
+            found_keys.insert(c, keys_inv[&c]);
+        }
+
+        let flood: Vec<(i32, i32)> = vec![(0, 1), (0, -1), (1, 0), (-1, 0)];
+
+        for f in &flood {
+            let x = (c.0 as i32 + f.0) as usize;
+            let y = (c.1 as i32 + f.1) as usize;
+            if !passages.contains(&(x, y)) {
+                continue;
+            }
+            queue.push_front((x, y));
+        }
+    }
+
+    return (found_keys, all_keys);
 }
 
 fn main() {
@@ -161,7 +202,7 @@ fn main() {
             }
             passages.insert((x, y));
             if c == '@' {
-                curr.insert((x,y));
+                curr.insert((x, y));
             } else if 'a' <= c && c <= 'z' {
                 keys.insert(c, (x, y));
                 keys_inv.insert((x, y), c);
@@ -189,7 +230,7 @@ fn main() {
                     print!("{}", doors_inv[&(x, y)]);
                 } else if keys_inv.contains_key(&(x, y)) {
                     print!("{}", keys_inv[&(x, y)]);
-                } else if curr.contains(&(x,y)) {
+                } else if curr.contains(&(x, y)) {
                     print!("@");
                 } else if passages.contains(&(x, y)) {
                     print!(".");
@@ -203,13 +244,9 @@ fn main() {
 
     let mut result = 0;
     for c in &curr {
-        let mut all_keys = 0;
-        for k in &keys {
-            add_key(&mut all_keys, *k.0);
-        }
-        println!("all keys: {}", all_keys);
-        
-        result += solve(&c, &keys_inv, &doors_inv, &passages, all_keys);
+        let (keys_c, all_keys) = prune(&c, &keys_inv, &passages);
+
+        result += solve(&c, &keys_c, &doors_inv, &passages, all_keys);
     }
     println!("result: {}", result);
 }
