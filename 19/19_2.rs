@@ -54,7 +54,7 @@ fn int_comp(arr: Vec<i64>, input: &mut VecDeque<i64>) -> i64 {
 
         if op == 4 {
             output = a1;
-            print!("{},", output);
+            //print!("{},", output);
             i += 2;
             continue;
         }
@@ -124,23 +124,26 @@ fn main() {
         -3, 21202, -4, -1, -2, 22201, -3, -2, 1, 21201, 1, 0, -4, 109, -5, 2105, 1, 0,
     ];
 
-    for y in 0..50 {
-        print!("\n");
-        for x in 0..50 {
-            let mut arr = zeros(a.len() * 100);
-            for i in 0..a.len() {
-                arr[i] = a[i];
+    let dbg = false;
+    if dbg {
+        for y in 0..50 {
+            print!("\n");
+            for x in 0..50 {
+                let mut arr = zeros(a.len() * 100);
+                for i in 0..a.len() {
+                    arr[i] = a[i];
+                }
+                let mut q = VecDeque::new();
+                q.push_front(x as i64);
+                q.push_front(y as i64);
+                let out = int_comp(arr, &mut q);
+                print!("{}", if out == 1 { '#' } else { '.' })
             }
-            let mut q = VecDeque::new();
-            q.push_front(x as i64);
-            q.push_front(y as i64);
-            let out = int_comp(arr, &mut q);
-            print!("{}", if out == 1 {'#'} else {'.'} )
         }
     }
-        
-    let mut x = 10;
-    let mut y = 10;
+
+    let mut x = 587;
+    let mut y = 650;
     loop {
         //println!("\nconsidering {} {}", x, y);
         {
@@ -158,35 +161,22 @@ fn main() {
                 continue;
             }
         }
-        /*{
-            let mut arr = zeros(a.len() * 100);
-            for i in 0..a.len() {
-                arr[i] = a[i];
-            }
-            let mut q = VecDeque::new();
-            q.push_front(x + 100 as i64);
-            q.push_front(y as i64);
-            let out = int_comp(arr, &mut q);
-            if out == 0 {
-                x += 1;
-                continue;
-            }
-        }*/
         {
             let mut arr = zeros(a.len() * 100);
             for i in 0..a.len() {
                 arr[i] = a[i];
             }
             let mut q = VecDeque::new();
-            q.push_front(x as i64);
-            q.push_front(y + 100 as i64);
+            q.push_front(x - 99 as i64);
+            q.push_front(y + 99 as i64);
             let out = int_comp(arr, &mut q);
             if out == 0 {
                 x += 1;
                 continue;
             }
         }
-        let result = x * 10000 + y;
+
+        let result = (x - 99) * 10000 + y;
         println!("\nresult: {}", result);
         return;
     }
