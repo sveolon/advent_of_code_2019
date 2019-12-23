@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::collections::VecDeque;
 
 fn insert_portal(
     portals: &mut HashMap<(usize, usize), String>,
@@ -121,4 +122,45 @@ FG..#########.....#
     }
     let begin = portals_rev["AA"];
     let end = portals_rev["ZZ"];
+
+    { /*
+         println!("\nportals:");
+         for (k, v) in portals {
+             println!("({},{}): {}", k.0, k.1, v);
+         }
+         println!("\nportals_pairs:");
+         for (k, v) in portals_pairs {
+             println!("({},{}): ({},{})", k.0, k.1, v.0, v.1);
+         } */
+    }
+
+    let mut queue = VecDeque::new();
+    let mut visited = HashSet::new();
+    queue.push_front((begin, 0));
+    
+    while queue.len() > 0 {
+        let (c, s) = queue.pop_back().unwrap();
+        if visited.contains(&c) {
+            continue;
+        }
+        visited.insert(c);
+
+        if c == end {
+            println!("Result: {}", s);
+            return;
+        }
+
+        let flood: Vec<(i32, i32)> = vec![(0, 1), (0, -1), (1, 0), (-1, 0)];
+
+        for f in &flood {
+            let x = (c.0 as i32 + f.0) as usize;
+            let y = (c.1 as i32 + f.1) as usize;
+            //if x == 0 || x > max_x || y == 0 || y > max_y { continue; }
+            if passages.contains(&(x, y)) {
+                queue.push_front(((x, y), s + 1));
+            } else if portals_pairs.contains_key(&(x, y)) {
+                queue.push_front((portals_pairs[&(x, y)], s + 1));
+            }
+        }
+    }
 }
