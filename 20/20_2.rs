@@ -303,24 +303,25 @@ LB........#.....#.#...#.....#                                                   
 
     let mut queue = VecDeque::new();
     let mut visited = HashSet::new();
-    queue.push_front((begin, 0));
+    queue.push_front((begin, 0, 0)); // ((x,y), steps, level)
     
     while queue.len() > 0 {
-        let (c, s) = queue.pop_back().unwrap();
-        if visited.contains(&c) {
+        let (c, s, l) = queue.pop_back().unwrap();
+        if visited.contains(&(c,l)) {
             continue;
         }
-        visited.insert(c);
+        visited.insert((c,l));
 
-        if c == end {
+        if c == end && l == 0 {
             println!("\nResult: {}", s);
             return;
         }
 
-        //println!("considering {} {}", c.0, c.1);
         if portals_pairs.contains_key(&c) {
-            //println!("using portal ({},{})->({},{})", c.0, c.1, portals_pairs[&c].0, portals_pairs[&c].1);
-            queue.push_front((portals_pairs[&c], s + 1));
+            let is_outer = portals[&c].1;
+            if l == 0 && is_outer { continue; }
+            let level = if is_outer { l - 1 } else { l + 1 };
+            queue.push_front((portals_pairs[&c], s + 1, level));
         }
         
         let flood: Vec<(i32, i32)> = vec![(0, 1), (0, -1), (1, 0), (-1, 0)];
@@ -330,7 +331,7 @@ LB........#.....#.#...#.....#                                                   
             let y = (c.1 as i32 + f.1) as usize;
             
             if passages.contains(&(x, y)) {
-                queue.push_front(((x, y), s + 1));
+                queue.push_front(((x, y), s + 1, l));
             }
         }
     }
