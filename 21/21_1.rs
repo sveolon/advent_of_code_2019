@@ -109,11 +109,13 @@ fn main() {
     }
     
     let inp = "\
-A,B,A,B,A,C,B,C,A,C
-L,6,R,12,L,6
-R,12,L,10,L,4,L,6
-L,10,L,10,L,4,L,6
-n
+NOT A J
+NOT B T
+OR  T J
+NOT C T
+OR  T J
+AND D J
+WALK
 ";
 
     let mut input = Vec::new();
