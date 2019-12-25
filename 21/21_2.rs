@@ -53,7 +53,7 @@ fn int_comp2(arr: Vec<i64>, input1: Vec<i64>) -> i64 {
 
         if op == 4 {
             output = a1;
-            print!("{}", (output as u8) as char);
+            //print!("{}", (output as u8) as char);
 
             i += 2;
             continue;
@@ -207,55 +207,62 @@ fn main() {
         109, -6, 2105, 1, 0,
     ];
 
-    let mut inp = format!("\n");
-    for count in 1..16 { // generate all programs count instructions long
-    
+    for count in 1..16 {
         let commands = 3;
         let read_regs = 11;
         let write_regs = 2;
+        
+        // generate all programs count instructions long
         let perms = count * commands * read_regs * write_regs;
         for i in 0..perms + 1 {
-            let cmd = match i % commands {
-                0 => "AND",
-                1 => "OR",
-                _ => "NOT",
-            };
-            let read_reg = match i / commands % read_regs {
-                0 => "A",
-                1 => "B",
-                2 => "C",
-                3 => "D",
-                4 => "E",
-                5 => "F",
-                6 => "G",
-                7 => "H",
-                8 => "I",
-                9 => "J",
-                _ => "T",
-            };
-            let write_reg = match i / commands / read_regs % write_regs {
-                0 => "J",
-                _ => "T",
-            };
+            let mut inp = format!("");
+            for _c in 0..count {
+                let cmd = match i % commands {
+                    0 => "AND",
+                    1 => "OR",
+                    _ => "NOT",
+                };
+                let read_reg = match i / commands % read_regs {
+                    0 => "A",
+                    1 => "B",
+                    2 => "C",
+                    3 => "D",
+                    4 => "E",
+                    5 => "F",
+                    6 => "G",
+                    7 => "H",
+                    8 => "I",
+                    9 => "J",
+                    _ => "T",
+                };
+                let write_reg = match i / commands / read_regs % write_regs {
+                    0 => "J",
+                    _ => "T",
+                };
 
-            let inp_tmp = format!("{} {} {}", cmd, read_reg, write_reg);
-            inp = format!("{}\n{}", inp, inp_tmp);
-        }
-        let inp = format!("{}\nRUN\n", inp);
-        println!("{}\n", inp);
+                let inp_tmp = format!("{} {} {}", cmd, read_reg, write_reg);
+                inp = format!("{}\n{}", inp, inp_tmp);
+            }
 
-        let mut arr2 = zeros(a.len() * 100);
-        for i in 0..a.len() {
-            arr2[i] = a[i].clone();
-        }
+            let inp = format!("{}\nRUN\n", inp);
 
-        let mut input = Vec::new();
-        for c in inp.chars() {
-            input.push((c as u8) as i64);
-        }
-        let res = int_comp2(arr2, input);
-        if res != 10 {
-            println!("\nresult: {}", res);
+            let mut arr2 = zeros(a.len() * 100);
+            for i in 0..a.len() {
+                arr2[i] = a[i].clone();
+            }
+
+            let mut input = Vec::new();
+            let mut cnt = 0;
+            for c in inp.chars() {
+                cnt += 1;
+                if cnt == 1 { continue; }
+                input.push((c as u8) as i64);
+            }
+            let res = int_comp2(arr2, input);
+            if res != 10 {
+                println!("\"{}\"\n", inp);
+                println!("\nresult: {}", res);
+            }
         }
     }
 }
