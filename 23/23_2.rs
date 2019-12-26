@@ -2430,13 +2430,13 @@ fn main() {
             }
         }
         
-        if idle_count == 50 && no_inp_count == 50 && no_out_count == 50 {
+        if /*idle_count == 50 &&*/ no_inp_count == 50  && no_out_count == 50 {
             num_idles += 1;
         } else {
             num_idles = 0;
         }
         
-        if num_idles > 10 {
+        if num_idles > 1000 {
             if nat == last_nat {
                 println!("Result: {}", nat.1);
                 return;
