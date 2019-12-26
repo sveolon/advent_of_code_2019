@@ -2397,8 +2397,9 @@ fn main() {
         vms.push(vm);
     }
 
-    let mut last_nat = (123,123);
-    let mut nat = (123,123);
+    let mut last_nat = (0,0);
+    let mut nat = (0,0);
+    let mut num_idles = 0;
     loop {
         let mut idle_count = 0;
         for i in 0..50 {
@@ -2418,7 +2419,24 @@ fn main() {
                 }
             }
         }
-        if idle_count == 50 {
+        let mut no_inp_count = 0;
+        let mut no_out_count = 0;
+        for i in 0..50 {
+            if vms[i].outputs.len() == 0 {
+                no_out_count += 1;
+            }
+            if vms[i].inputs.len() == 0 {
+                no_inp_count += 1;
+            }
+        }
+        
+        if idle_count == 50 && no_inp_count == 50 && no_out_count == 50 {
+            num_idles += 1;
+        } else {
+            num_idles = 0;
+        }
+        
+        if num_idles > 10 {
             if nat == last_nat {
                 println!("Result: {}", nat.1);
                 return;
