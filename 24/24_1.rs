@@ -8,11 +8,20 @@ fn main() {
 ##.##
 ..#.#";
 
+let _input = "\
+....#
+#..#.
+#..##
+..#..
+#....";
+
     let mut visited = HashSet::new();
     let mut current = to_biodev(input);
     visited.insert(current);
     print_field(current);
-            
+    
+    //print_field(gen(current, 0, 3));
+
     loop {
         current = next_gen(current);
         if visited.contains(&current) {
@@ -47,28 +56,27 @@ fn next_gen(current: i32) -> i32 {
 }
 
 fn gen(current: i32, x: i32, y: i32) -> i32 {
+    let flood = vec![(0, -1), (0, 1), (-1, 0), (1, 0)];
+    
     let mut n = 0;
-    for i in x-1..x+1 {
-        if i < 0 || i > 5 { continue; }
-        for j in y-1..y+1 {
-            if j < 0 || j > 5 { continue; }
-            if i == x && j == y { continue; }
-            let index = j * 5 + i;
-            if current & 1 << index != 0 {
-                n += 1;
-            }
+    for f in flood {
+        let i = x + f.0;
+        if i < 0 || i >= 5 { continue; }
+        let j = y + f.1;
+        if j < 0 || j >= 5 { continue; }
+        let index = j * 5 + i;
+        if (current & 1 << index) != 0 {
+            n += 1;
         }
     }
     
     let cur_index = y * 5 + x;
-    let is_occupied = current & (1 << cur_index);
+    let is_occupied = current & (1 << cur_index) != 0;
     
-    if is_occupied != 0 {
-        let result = if n == 1 { 1 } else { 0 };
-        return result << cur_index;
+    if is_occupied {
+        return if n == 1 { 1 << cur_index } else { 0 };
     } else {
-        let result = if n == 1 || n == 2 { 1 } else { 0 };
-        return result << cur_index;
+        return if n == 1 || n == 2 { 1 << cur_index } else { 0 };
     }
 }
 
