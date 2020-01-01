@@ -35,8 +35,8 @@ fn gen(current: &Vec<i32>, layer: i32, x: i32, y: i32) -> i32 {
     for f in flood {
         let mut l = layer;
 
-        let i = x + f.0;
-        let j = y + f.1;
+        let mut i = x + f.0;
+        let mut j = y + f.1;
 
         if i < 0 || i >= 5 || j < 0 || j >= 5 {
             l -= 1;
@@ -45,8 +45,19 @@ fn gen(current: &Vec<i32>, layer: i32, x: i32, y: i32) -> i32 {
         if l < 0 || l >= current.len() as i32 {
             continue;
         }
+        if i < 0 {
+            i = 1;
+        } else if i >= 5 {
+            i = 3;
+        }
+        if j < 0 {
+            j = 1;
+        } else if j >= 5 {
+            j = 3;
+        }
 
         let index = j * 5 + i;
+        //println!("gen {} {} {}; {} {}", layer, x, y, i, j);
         if (current[l as usize] & 1 << index) != 0 {
             n += 1;
         }
