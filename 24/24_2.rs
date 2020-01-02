@@ -38,28 +38,41 @@ fn gen(current: &Vec<i32>, layer: i32, x: i32, y: i32) -> i32 {
         let mut i = x + f.0;
         let mut j = y + f.1;
 
-        if i < 0 || i >= 5 || j < 0 || j >= 5 {
-            l -= 1;
-        }
+        if i == 3 && j == 3 {
+            // count inside neighbours
+            if x == 2 {
+                for k in 0..5
+            } else if x == 4 {
+                
+            } else if y == 2 {
+                
+            } else if y == 4 {
+                
+            }
+        } else {
+            if i < 0 || i >= 5 || j < 0 || j >= 5 {
+                l -= 1;
+            }
 
-        if l < 0 || l >= current.len() as i32 {
-            continue;
-        }
-        if i < 0 {
-            i = 1;
-        } else if i >= 5 {
-            i = 3;
-        }
-        if j < 0 {
-            j = 1;
-        } else if j >= 5 {
-            j = 3;
-        }
+            if l < 0 || l >= current.len() as i32 {
+                continue;
+            }
+            if i < 0 {
+                i = 1;
+            } else if i >= 5 {
+                i = 3;
+            }
+            if j < 0 {
+                j = 1;
+            } else if j >= 5 {
+                j = 3;
+            }
 
-        let index = j * 5 + i;
-        //println!("gen {} {} {}; {} {}", layer, x, y, i, j);
-        if (current[l as usize] & 1 << index) != 0 {
-            n += 1;
+            let index = j * 5 + i;
+            //println!("gen {} {} {}; {} {}", layer, x, y, i, j);
+            if (current[l as usize] & 1 << index) != 0 {
+                n += 1;
+            }
         }
     }
 
