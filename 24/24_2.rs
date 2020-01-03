@@ -16,6 +16,16 @@ fn main() {
         }
         generation = next_generation;
     }
+    
+    let mut result = 0;
+    for g in generation {
+        for i in 0..32 {
+            if g & 1 << i != 0 {
+                result += 1;
+            }
+        }
+    }
+    println!("result: {}", result);
 }
 
 fn next_gen(current: &Vec<i32>, i: i32) -> i32 {
@@ -38,16 +48,23 @@ fn gen(current: &Vec<i32>, layer: i32, x: i32, y: i32) -> i32 {
         let mut i = x + f.0;
         let mut j = y + f.1;
 
-        if i == 3 && j == 3 {
+        let l2 = layer as usize + 1;
+        if i == 3 && j == 3 && current.len() > l2 {
             // count inside neighbours
-            if x == 2 {
-                for k in 0..5
-            } else if x == 4 {
-                
-            } else if y == 2 {
-                
-            } else if y == 4 {
-                
+            for k in 0..5 {
+                let index;
+                if x == 2 {
+                    index = k * 5 + 0;
+                } else if x == 4 {
+                    index = k * 5 + 4;
+                } else if y == 2 {
+                    index = 0 * 5 + k;
+                } else /*if y == 4 */ {
+                    index = 4 * 5 + k;
+                }
+                if (current[l2] & 1 << index) != 0 {
+                    n += 1;
+                }
             }
         } else {
             if i < 0 || i >= 5 || j < 0 || j >= 5 {
