@@ -1,14 +1,22 @@
 fn main() {
-    let input = "\
+    let _input = "\
 #.###
 .....
 #..#.
 ##.##
 ..#.#";
 
+let input = "\
+....#
+#..#.
+#.?##
+..#..
+#....";
+
     let mut generation = vec![to_biodev(input)];
 
-    for _i in 0..200 {
+    //for _i in 0..200 {
+    for _i in 0..1 {
         let mut next_generation = Vec::new();
 
         for j in -1 as i32..generation.len() as i32 + 1 {
@@ -19,6 +27,7 @@ fn main() {
     
     let mut result = 0;
     for g in generation {
+        print_field(g);
         for i in 0..32 {
             if g & 1 << i != 0 {
                 result += 1;
@@ -121,4 +130,16 @@ fn to_biodev(input: &str) -> i32 {
         index += 1;
     }
     return result;
+}
+
+fn print_field(f: i32) {
+    print!("\n----------");
+    for y in 0..5 {
+        print!("\n");
+        for x in 0..5 {
+            let i = y * 5 + x;
+            let is_occupied = (f & 1 << i) != 0;
+            print!("{}", if is_occupied { "# " } else { ". " });
+        }
+    }
 }
