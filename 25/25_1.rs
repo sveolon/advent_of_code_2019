@@ -111,6 +111,31 @@ fn main() {
     let mut i = 0;
     let mut rb = 0;
     let mut input = VecDeque::new();
+
+        let inp = "\
+north
+take mutex
+east
+east
+east
+take whirled peas
+west
+west
+west
+south
+south
+take cake
+west
+south
+take easter egg
+south
+inv
+";
+
+    for c in inp.chars() {
+        input.push_front((c as u8) as i64);
+    }
+
     loop {
       int_comp2(&mut arr2, &mut i, &mut rb, &mut input);
       use std::io::{stdin,stdout,Write};
