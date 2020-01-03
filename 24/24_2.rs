@@ -41,6 +41,7 @@ fn next_gen(current: &Vec<i32>, i: i32) -> i32 {
     let mut result = 0;
     for x in 0..5 {
         for y in 0..5 {
+            if x == 2 && y == 2 { continue; }
             result += gen(&current, i, x, y);
         }
     }
@@ -58,7 +59,7 @@ fn gen(current: &Vec<i32>, layer: i32, x: i32, y: i32) -> i32 {
         let mut j = y + f.1;
 
         let l2 = layer as usize + 1;
-        if i == 3 && j == 3 && current.len() > l2 {
+        if i == 2 && j == 2 && current.len() > l2 {
             // count inside neighbours
             for k in 0..5 {
                 let index;
