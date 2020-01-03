@@ -44,7 +44,7 @@ fn int_comp2(a: &mut Vec<i64>, i: &mut usize, rb: &mut i64, input: & mut VecDequ
                 break;
             }
             let c = input.pop_back().unwrap();
-            print!("{}", (c as u8) as char);
+            //print!("{}", (c as u8) as char);
             a[ind1] = c;
             *i += 2;
             continue;
@@ -127,5 +127,6 @@ fn main() {
       for c in s.chars() {
         input.push_front((c as u8) as i64);
       }
+      input.push_front(('\n' as u8) as i64);
     }
 }
