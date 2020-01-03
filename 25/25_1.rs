@@ -113,6 +113,9 @@ fn main() {
     let mut input = VecDeque::new();
 
         let inp = "\
+west
+take space law space brochure
+east
 north
 take mutex
 east
