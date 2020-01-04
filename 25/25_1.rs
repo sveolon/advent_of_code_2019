@@ -4915,9 +4915,6 @@ fn main() {
     let mut input = VecDeque::new();
 
     let inpt = "\
-west
-take space law space brochure
-east
 north
 take mutex
 east
@@ -4928,6 +4925,18 @@ west
 west
 west
 south
+west
+take space law space brochure
+north
+take loom
+south
+south
+take hologram
+west
+take manifold
+east
+north
+east
 south
 take cake
 west
@@ -4937,19 +4946,22 @@ south
 inv";
 
     let v = vec![
-        "whirled peas",
-        "cake",
-        "space law space brochure",
-        "mutex",
-        "easter egg",
+"whirled peas",
+"hologram",
+"cake",
+"space law space brochure",
+"loom",
+"mutex",
+"easter egg",
+"manifold"
     ];
 
     let mut inp = format!("{}", inpt);
-    for i in 0..2_i32.pow(5) {
-        for j in 0..5 {
+    for i in 0..2_i32.pow(v.len() as u32) {
+        for j in 0..v.len() {
             inp = format!("{}\ndrop {}", inp, v[j]);
         }
-        for j in 0..6 {
+        for j in 0..v.len() + 1 {
             if i & (1 << j) != 0 {
                 inp = format!("{}\ntake {}", inp, v[j]);
             }
@@ -4959,6 +4971,11 @@ inv";
     inp = format!("{}\n", inp);
 
     print!("{}", inp);
+
+
+/*let inp = "
+inv
+";*/
 
     for c in inp.chars() {
         input.push_front((c as u8) as i64);
