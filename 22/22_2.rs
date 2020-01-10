@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+//use std::collections::VecDeque;
 
 #[derive(PartialOrd, PartialEq, Clone, Copy)]
 enum Type {
@@ -14,7 +14,7 @@ struct Op {
 }
 
 const N_CARDS: i32 = 10007;
-    
+
 fn main() {
     let commands = [
         "cut -7812",
@@ -121,6 +121,7 @@ fn main() {
 
     let mut cmds = parse(&commands);
     sort(&mut cmds);
+    display(&cmds);
 }
 /*
 fn apply(c: &str, deck: &mut VecDeque<u32>) {
@@ -173,6 +174,19 @@ fn cut(arg: i32, deck: &mut VecDeque<u32>) {
 }
 */
 
+fn display(cmds: &Vec<Op>) {
+    println!("display(len {}): ", cmds.len());
+    for i in 0..cmds.len() {
+        let t = match &cmds[i].t {
+            Type::Cut => "Cut",
+            Type::DealNew => "DealNew",
+            _ => "DealInc"
+        };
+        print!("'{} {}'; ", t, &cmds[i].a);
+    }
+    print!("\n");
+}
+
 fn parse(input: &[&str]) -> Vec<Op> {
     let mut res = Vec::new();
     for c in input.iter() {
@@ -201,29 +215,49 @@ fn parse(input: &[&str]) -> Vec<Op> {
 fn sort(a: &mut Vec<Op>) {
     let mut swapped = true;
     while swapped {
+        display(a);
+        let mut input = Vec::new();
         swapped = false;
         for i in 0..a.len() - 1 {
-            if a[i].t < a[i+1].t {
-                let (f,s) = swap(&a[i], &a[i+1]);
-                a[i] = f;
-                a[i+1] = s;
-                swapped = true;
+            if a[i].t < a[i + 1].t {
+                let (sw, next) = swap(&a[i], &a[i + 1]);
+                for n in next {
+                    input.push(n);
+                }
+                swapped |= sw;
             }
         }
+        *a = input;
     }
 }
 
-fn swap(first: &Op, second: &Op) -> (Op, Op) {
-    //return (*second, *first);
+fn swap(first: &Op, second: &Op) -> (bool, Vec<Op>) {
     if first.t == Type::DealNew && second.t == Type::Cut {
-        return (
-        Op{t: Type::Cut, a: N_CARDS - second.a}, 
-        *first
-        );
+        return (true, vec![
+            Op {
+                t: Type::Cut,
+                a: N_CARDS - second.a,
+            },
+            *first,
+        ]);
     } else if first.t == Type::Cut && second.t == Type::DealInc {
-        return (
-        *second,
-        Op{t: Type::Cut, a: (first.a * second.a) % N_CARDS}
-        );
+        return (true, vec![
+            *second,
+            Op {
+                t: Type::Cut,
+                a: (first.a * second.a) % N_CARDS,
+            },
+        ]);
+    } else if first.t == Type::DealNew && second.t == Type::DealInc {
+        return (true, vec![
+            *second,
+            Op {
+                t: Type::Cut,
+                a: N_CARDS + 1 - second.a,
+            },
+            *first,
+        ]);
+    } else {
+        return (false, vec![*first, *second]);
     }
 }
