@@ -1,18 +1,21 @@
 use std::collections::VecDeque;
 
+#[derive(PartialOrd, PartialEq, Clone, Copy)]
 enum Type {
-    Cut,
-    DealNew,
-    DealInc,
+    DealInc = 0,
+    Cut = 1,
+    DealNew = 2,
 }
 
+#[derive(PartialOrd, PartialEq, Clone, Copy)]
 struct Op {
     t: Type,
     a: i32,
 }
 
+const N_CARDS: i32 = 10007;
+    
 fn main() {
-    //let n_cards = 10007;
     let commands = [
         "cut -7812",
         "deal with increment 55",
@@ -116,15 +119,8 @@ fn main() {
         "cut -5914",
     ];
 
-    let cmds = parse(&commands);
-    for i in 0..cmds.len() {
-        let t = match &cmds[i].t {
-            Type::Cut => "Cut",
-            Type::DealNew => "DealNew",
-            _ => "DealInc"
-        };
-        println!("{}\t{} {}", commands[i], t, &cmds[i].a);
-    }
+    let mut cmds = parse(&commands);
+    sort(&mut cmds);
 }
 /*
 fn apply(c: &str, deck: &mut VecDeque<u32>) {
@@ -200,4 +196,34 @@ fn parse(input: &[&str]) -> Vec<Op> {
         }
     }
     return res;
+}
+
+fn sort(a: &mut Vec<Op>) {
+    let mut swapped = true;
+    while swapped {
+        swapped = false;
+        for i in 0..a.len() - 1 {
+            if a[i].t < a[i+1].t {
+                let (f,s) = swap(&a[i], &a[i+1]);
+                a[i] = f;
+                a[i+1] = s;
+                swapped = true;
+            }
+        }
+    }
+}
+
+fn swap(first: &Op, second: &Op) -> (Op, Op) {
+    //return (*second, *first);
+    if first.t == Type::DealNew && second.t == Type::Cut {
+        return (
+        Op{t: Type::Cut, a: N_CARDS - second.a}, 
+        *first
+        );
+    } else if first.t == Type::Cut && second.t == Type::DealInc {
+        return (
+        *second,
+        Op{t: Type::Cut, a: (first.a * second.a) % N_CARDS}
+        );
+    }
 }
