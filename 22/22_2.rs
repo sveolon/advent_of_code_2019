@@ -131,6 +131,7 @@ fn main() {
     display(&c2);
     sort(&mut c2);
     display(&c2);
+    collapse(&mut c2);
 }
 /*
 fn apply(c: &str, deck: &mut VecDeque<u32>) {
@@ -223,6 +224,37 @@ fn parse(input: &[&str]) -> Vec<Op> {
         }
     }
     return res;
+}
+
+fn collapse(a: &mut Vec<Op>) {
+    if a.len() < 1 {
+        return;
+    }
+    
+    let result = Vec::new();
+    let current = a[0];
+    for i in 1..a.len() {
+        if current.t == a[i].t {
+            current = merge(&current, &a[i]);
+        } else {
+            result.push(current);
+            current = a[i];
+        }
+    }
+    result.push(current);
+    return result;
+}
+
+fn merge(first: &Op, second: &Op) -> Vec<Op> {
+    if first.t == Type::DealNew && second.t == Type::DealNew {
+        return vec![];
+    } else if first.t == Type::Cut && second.t == Type::Cut {
+        return vec![Op{t: Type::Cut, a: (first.a+second.a) % N_CARDS}];
+    } if first.t == Type::DealInc && second.t == Type::DealInc {
+        return vec![Op{t: Type::Cut, a: (first.a*second.a) % N_CARDS}];
+    } else {
+        return vec![*first, *second];
+    }
 }
 
 fn sort(a: &mut Vec<Op>) {
