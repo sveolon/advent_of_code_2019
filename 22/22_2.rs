@@ -228,23 +228,25 @@ fn parse(input: &[&str]) -> Vec<Op> {
 fn sort(a: &mut Vec<Op>) {
     let mut swapped = true;
     while swapped {
-        display(a);
+        //display(a);
         let mut input = Vec::new();
         swapped = false;
         let mut i = 0;
         while i < a.len() - 1 {
-            println!("i: {}", i);
+            //println!("i: {}", i);
             let (sw, next) = swap(&a[i], &a[i + 1]);
-            println!("swap({}, {}) returned: ", to_str(&a[i]), to_str(&a[i+1]));
-            display(&next);
+            //println!("swap({}, {}) returned: ", to_str(&a[i]), to_str(&a[i+1]));
+            //display(&next);
             
-            for n in next {
-                input.push(n);
-            }
             swapped |= sw;
-
-            i += 1;
-            if sw {
+            
+            if sw || i + 1 >= a.len() - 1 {
+                for n in next {
+                    input.push(n);
+                }
+                i += 2;
+            } else {
+                input.push(next[0]);
                 i += 1;
             }
         }
