@@ -16,7 +16,7 @@ struct Op {
 const N_CARDS: i32 = 10007;
 
 fn main() {
-    let commands = [
+    /*let commands = [
         "cut -7812",
         "deal with increment 55",
         "cut -3909",
@@ -122,6 +122,15 @@ fn main() {
     let mut cmds = parse(&commands);
     sort(&mut cmds);
     display(&cmds);
+    */
+    let c1 = [
+"deal into new stack",
+"deal with increment 7"
+];
+    let mut c2 = parse(&c1);
+    display(&c2);
+    sort(&mut c2);
+    display(&c2);
 }
 /*
 fn apply(c: &str, deck: &mut VecDeque<u32>) {
@@ -174,15 +183,19 @@ fn cut(arg: i32, deck: &mut VecDeque<u32>) {
 }
 */
 
+fn to_str(op: &Op) -> String {
+    let t = match op.t {
+        Type::Cut => "Cut",
+        Type::DealNew => "DealNew",
+        _ => "DealInc",
+    };
+    return format!("'{}, {}'", t, &op.a);    
+}
+
 fn display(cmds: &Vec<Op>) {
     println!("display(len {}): ", cmds.len());
     for i in 0..cmds.len() {
-        let t = match &cmds[i].t {
-            Type::Cut => "Cut",
-            Type::DealNew => "DealNew",
-            _ => "DealInc"
-        };
-        print!("'{} {}'; ", t, &cmds[i].a);
+        print!("{}; " , to_str(&cmds[i]));
     }
     print!("\n");
 }
@@ -218,13 +231,21 @@ fn sort(a: &mut Vec<Op>) {
         display(a);
         let mut input = Vec::new();
         swapped = false;
-        for i in 0..a.len() - 1 {
-            if a[i].t < a[i + 1].t {
-                let (sw, next) = swap(&a[i], &a[i + 1]);
-                for n in next {
-                    input.push(n);
-                }
-                swapped |= sw;
+        let mut i = 0;
+        while i < a.len() - 1 {
+            println!("i: {}", i);
+            let (sw, next) = swap(&a[i], &a[i + 1]);
+            println!("swap({}, {}) returned: ", to_str(&a[i]), to_str(&a[i+1]));
+            display(&next);
+            
+            for n in next {
+                input.push(n);
+            }
+            swapped |= sw;
+
+            i += 1;
+            if sw {
+                i += 1;
             }
         }
         *a = input;
@@ -233,30 +254,39 @@ fn sort(a: &mut Vec<Op>) {
 
 fn swap(first: &Op, second: &Op) -> (bool, Vec<Op>) {
     if first.t == Type::DealNew && second.t == Type::Cut {
-        return (true, vec![
-            Op {
-                t: Type::Cut,
-                a: N_CARDS - second.a,
-            },
-            *first,
-        ]);
+        return (
+            true,
+            vec![
+                Op {
+                    t: Type::Cut,
+                    a: N_CARDS - second.a,
+                },
+                *first,
+            ],
+        );
     } else if first.t == Type::Cut && second.t == Type::DealInc {
-        return (true, vec![
-            *second,
-            Op {
-                t: Type::Cut,
-                a: (first.a * second.a) % N_CARDS,
-            },
-        ]);
+        return (
+            true,
+            vec![
+                *second,
+                Op {
+                    t: Type::Cut,
+                    a: (first.a * second.a) % N_CARDS,
+                },
+            ],
+        );
     } else if first.t == Type::DealNew && second.t == Type::DealInc {
-        return (true, vec![
-            *second,
-            Op {
-                t: Type::Cut,
-                a: N_CARDS + 1 - second.a,
-            },
-            *first,
-        ]);
+        return (
+            true,
+            vec![
+                *second,
+                Op {
+                    t: Type::Cut,
+                    a: N_CARDS + 1 - second.a,
+                },
+                *first,
+            ],
+        );
     } else {
         return (false, vec![*first, *second]);
     }
