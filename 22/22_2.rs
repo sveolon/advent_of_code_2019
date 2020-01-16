@@ -118,7 +118,6 @@ fn main() {/*
         "deal with increment 20",
         "cut -5914",
     ];
-
     let mut d1 = VecDeque::new();
     let mut d2 = VecDeque::new();
     for i in 0..N_CARDS {
@@ -143,14 +142,7 @@ fn main() {/*
     println!("d1: {:?}", d1);
     println!("d2: {:?}", d2);
 */
-    println!("Test test test");
-    let mut d1 = VecDeque::new();
-    let mut d2 = VecDeque::new();
-    for i in 0..N_CARDS {
-        d1.push_back(i as u32);
-        d2.push_back(i as u32);
-    }
-    
+
     let c1 = [
         "cut -7812",
         "deal with increment 55",
@@ -161,21 +153,27 @@ fn main() {/*
         "cut -77",
 ];
     let mut c2 = parse(&c1);
-    for c in c2.iter() {
-        apply(c, &mut d1);
-    }
     display(&c2);
+    try_it(&c2);
     sort(&mut c2);
     display(&c2);
+    try_it(&c2);
     collapse(&mut c2);
     display(&c2);
-    
-    for c in c2.iter() {
-        apply(c, &mut d2);
+    try_it(&c2);
+}
+
+fn try_it(cmds: &Vec<Op>) {
+    println!("Try:");
+    let mut d1 = VecDeque::new();
+    for i in 0..N_CARDS {
+        d1.push_back(i as u32);
     }
-    
+
+    for c in cmds.iter() {
+        apply(c, &mut d1);
+    }
     println!("d1: {:?}", d1);
-    println!("d2: {:?}", d2);
 }
 
 fn apply(c: &Op, deck: &mut VecDeque<u32>) {
