@@ -126,9 +126,12 @@ fn main() {
     collapse(&mut cmds);
     display(&cmds);
 
-    /*let c1 = [
-"deal with increment 5",
-"deal with increment 7"
+    /*println!("Test test test");
+    let c1 = [
+        "cut -7812",
+        "deal with increment 55",
+        "deal into new stack",
+        "deal with increment 4",
 ];
     let mut c2 = parse(&c1);
     display(&c2);
@@ -218,7 +221,7 @@ fn merge(first: &Op, second: &Op) -> Vec<Op> {
     } else if first.t == Type::Cut && second.t == Type::Cut {
         return vec![Op{t: Type::Cut, a: (first.a+second.a) % N_CARDS}];
     } if first.t == Type::DealInc && second.t == Type::DealInc {
-        return vec![Op{t: Type::Cut, a: (first.a*second.a) % N_CARDS}];
+        return vec![Op{t: Type::DealInc, a: (first.a*second.a) % N_CARDS}];
     } else {
         return vec![*first, *second];
     }
@@ -227,6 +230,7 @@ fn merge(first: &Op, second: &Op) -> Vec<Op> {
 fn sort(a: &mut Vec<Op>) {
     let mut swapped = true;
     while swapped {
+        //println!("\nEntering swap():");
         //display(a);
         let mut input = Vec::new();
         swapped = false;
@@ -234,7 +238,7 @@ fn sort(a: &mut Vec<Op>) {
         while i < a.len() - 1 {
             //println!("i: {}", i);
             let (sw, next) = swap(&a[i], &a[i + 1]);
-            //println!("swap({}, {}) returned: ", to_str(&a[i]), to_str(&a[i+1]));
+            //println!("\nswap({}, {}) returned: ", to_str(&a[i]), to_str(&a[i+1]));
             //display(&next);
             
             swapped |= sw;
