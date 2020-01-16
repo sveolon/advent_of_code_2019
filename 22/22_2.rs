@@ -119,17 +119,7 @@ fn main() {
         "cut -5914",
     ];
     
-    let mut cmds = parse(&commands);
-    display(&cmds);
-    try_it(&cmds);
-    sort(&mut cmds);
-    display(&cmds);
-    try_it(&cmds);
-    collapse(&mut cmds);
-    display(&cmds);
-    try_it(&cmds);
-
-/*    let c1 = [
+    let commands_tmp = [
         "cut -7812",
         "deal with increment 55",
         "cut -3909",
@@ -141,16 +131,23 @@ fn main() {
         "deal into new stack",
         "deal with increment 36",
         "cut 5266",
-];
-    let mut c2 = parse(&c1);
-    display(&c2);
-    try_it(&c2);
-    sort(&mut c2);
-    display(&c2);
-    try_it(&c2);
-    collapse(&mut c2);
-    display(&c2);
-    try_it(&c2);*/
+        "deal with increment 20",
+        "cut 8726",
+        "deal with increment 22",
+        "cut 4380",
+        "deal into new stack",
+    ];
+    
+    //let mut cmds = parse(&commands);
+    let mut cmds = parse(&commands_tmp);
+    display(&cmds);
+    try_it(&cmds);
+    sort(&mut cmds);
+    display(&cmds);
+    try_it(&cmds);
+    collapse(&mut cmds);
+    display(&cmds);
+    try_it(&cmds);
 }
 
 fn try_it(cmds: &Vec<Op>) {
