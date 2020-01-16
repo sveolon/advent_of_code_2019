@@ -15,7 +15,7 @@ struct Op {
 
 const N_CARDS: i32 = 10007;
 
-fn main() {/*
+fn main() {
     let commands = [
         "cut -7812",
         "deal with increment 55",
@@ -118,32 +118,18 @@ fn main() {/*
         "deal with increment 20",
         "cut -5914",
     ];
-    let mut d1 = VecDeque::new();
-    let mut d2 = VecDeque::new();
-    for i in 0..N_CARDS {
-        d1.push_back(i as u32);
-        d2.push_back(i as u32);
-    }
     
     let mut cmds = parse(&commands);
-    for c in cmds.iter() {
-        apply(c, &mut d1);
-    }
     display(&cmds);
+    try_it(&cmds);
     sort(&mut cmds);
     display(&cmds);
+    try_it(&cmds);
     collapse(&mut cmds);
     display(&cmds);
-    
-    for c in cmds.iter() {
-        apply(c, &mut d2);
-    }
-    
-    println!("d1: {:?}", d1);
-    println!("d2: {:?}", d2);
-*/
+    try_it(&cmds);
 
-    let c1 = [
+/*    let c1 = [
         "cut -7812",
         "deal with increment 55",
         "cut -3909",
@@ -151,6 +137,10 @@ fn main() {/*
         "deal into new stack",
         "deal with increment 4",
         "cut -77",
+        "deal with increment 26",
+        "deal into new stack",
+        "deal with increment 36",
+        "cut 5266",
 ];
     let mut c2 = parse(&c1);
     display(&c2);
@@ -160,7 +150,7 @@ fn main() {/*
     try_it(&c2);
     collapse(&mut c2);
     display(&c2);
-    try_it(&c2);
+    try_it(&c2);*/
 }
 
 fn try_it(cmds: &Vec<Op>) {
@@ -307,30 +297,31 @@ fn merge(first: &Op, second: &Op) -> Vec<Op> {
 fn sort(a: &mut Vec<Op>) {
     let mut swapped = true;
     while swapped {
-        //println!("\nEntering swap():");
-        //display(a);
-        let mut input = Vec::new();
         swapped = false;
+        let mut new_a = Vec::new();
+        
         let mut i = 0;
         while i < a.len() - 1 {
-            //println!("i: {}", i);
             let (sw, next) = swap(&a[i], &a[i + 1]);
-            //println!("\nswap({}, {}) returned: ", to_str(&a[i]), to_str(&a[i+1]));
-            //display(&next);
             
-            swapped |= sw;
-            
-            if sw || i + 1 >= a.len() - 1 {
+            if !sw {
+                new_a.push(a[i]);
+                i += 1;
+            } else {
                 for n in next {
-                    input.push(n);
+                    new_a.push(n);
                 }
                 i += 2;
-            } else {
-                input.push(next[0]);
-                i += 1;
+                swapped = true;
+                break;
             }
         }
-        *a = input;
+        while i < a.len() {
+            new_a.push(a[i]);
+            i += 1;
+        }
+        
+        *a = new_a;
     }
 }
 
