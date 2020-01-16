@@ -16,7 +16,7 @@ struct Op {
 const N_CARDS: i32 = 10007;
 
 fn main() {
-    /*let commands = [
+    let commands = [
         "cut -7812",
         "deal with increment 55",
         "cut -3909",
@@ -120,11 +120,14 @@ fn main() {
     ];
 
     let mut cmds = parse(&commands);
+    display(&cmds);
     sort(&mut cmds);
     display(&cmds);
-    */
-    let c1 = [
-"deal into new stack",
+    collapse(&mut cmds);
+    display(&cmds);
+
+    /*let c1 = [
+"deal with increment 5",
 "deal with increment 7"
 ];
     let mut c2 = parse(&c1);
@@ -132,57 +135,8 @@ fn main() {
     sort(&mut c2);
     display(&c2);
     collapse(&mut c2);
+    display(&c2);*/
 }
-/*
-fn apply(c: &str, deck: &mut VecDeque<u32>) {
-    if c.starts_with("deal with increment ") {
-        let arg: i32 = c.split(" ").nth(3).unwrap().parse().unwrap();
-        deal_inc(arg, deck);
-    } else if c == "deal into new stack" {
-        deal_new(deck);
-    } else if c.starts_with("cut ") {
-        let arg: i32 = c.split(" ").nth(1).unwrap().parse().unwrap();
-        cut(arg, deck);
-    }
-}
-
-fn deal_new(deck: &mut VecDeque<u32>) {
-    let mut tmp = VecDeque::new();
-    while deck.len() > 0 {
-        tmp.push_front(deck.pop_front().unwrap());
-    }
-    while tmp.len() > 0 {
-        deck.push_front(tmp.pop_back().unwrap());
-    }
-}
-
-fn deal_inc(arg: i32, deck: &mut VecDeque<u32>) {
-    let mut tmp = VecDeque::new();
-    for _i in 0..deck.len() {
-        tmp.push_front(0);
-    }
-    for i in 0..deck.len() {
-        let idx = i * arg as usize % tmp.len();
-        tmp[idx] = deck.pop_front().unwrap();
-    }
-    while tmp.len() > 0 {
-        deck.push_front(tmp.pop_back().unwrap());
-    }
-}
-
-fn cut(arg: i32, deck: &mut VecDeque<u32>) {
-    let ct = if arg > 0 {
-        arg
-    } else {
-        deck.len() as i32 + arg
-    };
-
-    for _i in 0..ct {
-        let tmp = deck.pop_front().unwrap();
-        deck.push_back(tmp);
-    }
-}
-*/
 
 fn to_str(op: &Op) -> String {
     let t = match op.t {
@@ -231,18 +185,31 @@ fn collapse(a: &mut Vec<Op>) {
         return;
     }
     
-    let result = Vec::new();
-    let current = a[0];
-    for i in 1..a.len() {
-        if current.t == a[i].t {
-            current = merge(&current, &a[i]);
+    let mut result = Vec::new();
+    let mut current = a[0];
+    let mut i = 1;
+    while i < a.len() {
+        if current.t == Type::DealNew && a[i].t == Type::DealNew {
+            i += 2;
+            if i >= a.len() {
+                *a = result;
+                return;
+            } else {
+                current = a[i];
+                i += 1;
+            }
+        } else if current.t == a[i].t {
+            let m = merge(&current, &a[i]);
+            current = m[0];
+            i += 1;
         } else {
             result.push(current);
             current = a[i];
+            i += 1;
         }
     }
     result.push(current);
-    return result;
+    *a = result;
 }
 
 fn merge(first: &Op, second: &Op) -> Vec<Op> {
