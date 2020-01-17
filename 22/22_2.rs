@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 #[derive(PartialOrd, PartialEq, Clone, Copy)]
 enum Type {
     DealInc = 0,
@@ -10,10 +8,11 @@ enum Type {
 #[derive(PartialOrd, PartialEq, Clone, Copy)]
 struct Op {
     t: Type,
-    a: i32,
+    a: i128,
 }
 
-const N_CARDS: i32 = 10007;
+const N_CARDS: i128 = 119315717514047;
+const N_SHUFFLES: i128 = 101741582076661;
 
 fn main() {
     let commands = [
@@ -121,68 +120,43 @@ fn main() {
 
     let mut cmds = parse(&commands);
     display(&cmds);
-    try_it(&cmds);
     sort(&mut cmds);
     display(&cmds);
-    try_it(&cmds);
     collapse(&mut cmds);
     display(&cmds);
-    try_it(&cmds);
-}
 
-fn try_it(cmds: &Vec<Op>) {
-    println!("Try:");
-    let mut d1 = VecDeque::new();
-    for i in 0..N_CARDS {
-        d1.push_back(i as u32);
+    let mut doubles = Vec::new();
+    doubles.push(cmds.clone());
+    let mut num = 1;
+    while num < N_SHUFFLES {
+        let mut tmp = cmds.clone();
+        for c in cmds.iter() {
+            tmp.push(*c);
+        }
+        sort(&mut tmp);
+        collapse(&mut tmp);
+        cmds = tmp;
+        doubles.push(cmds.clone());
+        num *= 2;
     }
 
-    for c in cmds.iter() {
-        apply(c, &mut d1);
+    cmds = doubles[0].clone();
+    let mut i: usize = 1;
+    while num::pow(2_i128, i) < N_SHUFFLES {
+        if N_SHUFFLES & num::pow(2_i128, i) != 0 {
+            let mut tmp = cmds.clone();
+            for c in doubles[i].iter() {
+                tmp.push(*c);
+            }
+            sort(&mut tmp);
+            collapse(&mut tmp);
+            cmds = tmp;
+        }
+        i += 1;
     }
-    println!("d1: {:?}", d1);
-}
-
-fn apply(c: &Op, deck: &mut VecDeque<u32>) {
-    match c.t {
-        Type::DealInc => deal_inc(c.a, deck),
-        Type::DealNew => deal_new(deck),
-        _ => cut(c.a, deck),
-    }
-}
-
-fn deal_new(deck: &mut VecDeque<u32>) {
-    let mut tmp = VecDeque::new();
-    while deck.len() > 0 {
-        tmp.push_front(deck.pop_front().unwrap());
-    }
-    while tmp.len() > 0 {
-        deck.push_front(tmp.pop_back().unwrap());
-    }
-}
-fn deal_inc(arg: i32, deck: &mut VecDeque<u32>) {
-    let mut tmp = VecDeque::new();
-    for _i in 0..deck.len() {
-        tmp.push_front(0);
-    }
-    for i in 0..deck.len() {
-        let idx = i * arg as usize % tmp.len();
-        tmp[idx] = deck.pop_front().unwrap();
-    }
-    while tmp.len() > 0 {
-        deck.push_front(tmp.pop_back().unwrap());
-    }
-}
-fn cut(arg: i32, deck: &mut VecDeque<u32>) {
-    let ct = if arg > 0 {
-        arg
-    } else {
-        deck.len() as i32 + arg
-    };
-    for _i in 0..ct {
-        let tmp = deck.pop_front().unwrap();
-        deck.push_back(tmp);
-    }
+    
+    println!("All combined:");
+    display(&cmds);
 }
 
 fn to_str(op: &Op) -> String {
@@ -206,7 +180,7 @@ fn parse(input: &[&str]) -> Vec<Op> {
     let mut res = Vec::new();
     for c in input.iter() {
         if c.starts_with("deal with increment ") {
-            let arg: i32 = c.split(" ").nth(3).unwrap().parse().unwrap();
+            let arg: i128 = c.split(" ").nth(3).unwrap().parse().unwrap();
             res.push(Op {
                 t: Type::DealInc,
                 a: arg,
@@ -217,7 +191,7 @@ fn parse(input: &[&str]) -> Vec<Op> {
                 a: 0,
             });
         } else if c.starts_with("cut ") {
-            let arg: i32 = c.split(" ").nth(1).unwrap().parse().unwrap();
+            let arg: i128 = c.split(" ").nth(1).unwrap().parse().unwrap();
             res.push(Op {
                 t: Type::Cut,
                 a: arg,
