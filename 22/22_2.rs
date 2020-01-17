@@ -16,7 +16,7 @@ struct Op {
 const N_CARDS: i32 = 10007;
 
 fn main() {
-    let commands = [
+    let _commands = [
         "cut -7812",
         "deal with increment 55",
         "cut -3909",
@@ -118,7 +118,7 @@ fn main() {
         "deal with increment 20",
         "cut -5914",
     ];
-    
+
     let commands_tmp = [
         "cut -7812",
         "deal with increment 55",
@@ -137,7 +137,7 @@ fn main() {
         "cut 4380",
         "deal into new stack",
     ];
-    
+
     //let mut cmds = parse(&commands);
     let mut cmds = parse(&commands_tmp);
     display(&cmds);
@@ -211,13 +211,13 @@ fn to_str(op: &Op) -> String {
         Type::DealNew => "DealNew",
         _ => "DealInc",
     };
-    return format!("'{}, {}'", t, &op.a);    
+    return format!("'{}, {}'", t, &op.a);
 }
 
 fn display(cmds: &Vec<Op>) {
     println!("display(len {}): ", cmds.len());
     for i in 0..cmds.len() {
-        print!("{}; " , to_str(&cmds[i]));
+        print!("{}; ", to_str(&cmds[i]));
     }
     print!("\n");
 }
@@ -251,7 +251,28 @@ fn collapse(a: &mut Vec<Op>) {
     if a.len() < 1 {
         return;
     }
+
+    //let deal_inc = merge_deal_inc(&a);
+    let deal_inc = copy_all(&a, Type::DealInc);
+    //let cut = merge_cut(&a);
+    let cut = copy_all(&a, Type::Cut);
+    let deal_new = merge_deal_new(&a);
+    //let deal_new = copy_all(&a, Type::DealNew);
     
+    let mut result = Vec::new();
+    for i in deal_inc.iter() {
+        result.push(*i);
+    }
+    for i in cut.iter() {
+        result.push(*i);
+    }
+    for i in deal_new.iter() {
+        result.push(*i);
+    }
+    *a = result;
+
+    /*
+
     let mut result = Vec::new();
     let mut current = a[0];
     let mut i = 1;
@@ -276,16 +297,99 @@ fn collapse(a: &mut Vec<Op>) {
         }
     }
     result.push(current);
-    *a = result;
+    *a = result;*/
+}
+
+fn copy_all(a: &Vec<Op>, t: Type) -> Vec<Op> {
+    let mut result = Vec::new();
+    
+    for i in a.iter() {
+        if i.t == t {
+            result.push(*i);
+        }
+    }
+    return result;
+}
+
+fn merge_deal_new(a: &Vec<Op>) -> Vec<Op> {
+    let mut count = 0;
+    for i in a.iter() {
+        if i.t == Type::DealNew {
+            count += 1;
+        }
+    }
+    if count % 2 == 1 {
+        return vec![Op {
+            t: Type::DealNew,
+            a: 0,
+        }];
+    } else {
+        return vec![];
+    }
+}
+
+fn merge_deal_inc(a: &Vec<Op>) -> Vec<Op> {
+    let mut i = 0;
+    while i < a.len() {
+        if a[i].t == Type::DealInc {
+            break;
+        }
+        i += 1;
+    }
+    if i == a.len() {
+        return vec![];
+    }
+
+    let mut current = a[i];
+
+    while i < a.len() && a[i].t == Type::DealInc {
+        current = Op {
+            t: Type::DealInc,
+            a: (current.a * a[i].a) % N_CARDS,
+        };
+        i += 1;
+    }
+    return vec![current];
+}
+
+fn merge_cut(a: &Vec<Op>) -> Vec<Op> {
+    let mut i = 0;
+    while i < a.len() {
+        if a[i].t == Type::Cut {
+            break;
+        }
+        i += 1;
+    }
+    if i == a.len() {
+        return vec![];
+    }
+
+    let mut current = a[i];
+
+    while i < a.len() && a[i].t == Type::Cut {
+        current = Op {
+            t: Type::Cut,
+            a: (current.a + a[i].a) % N_CARDS,
+        };
+        i += 1;
+    }
+    return vec![current];
 }
 
 fn merge(first: &Op, second: &Op) -> Vec<Op> {
     if first.t == Type::DealNew && second.t == Type::DealNew {
         return vec![];
     } else if first.t == Type::Cut && second.t == Type::Cut {
-        return vec![Op{t: Type::Cut, a: (first.a+second.a) % N_CARDS}];
-    } if first.t == Type::DealInc && second.t == Type::DealInc {
-        return vec![Op{t: Type::DealInc, a: (first.a*second.a) % N_CARDS}];
+        return vec![Op {
+            t: Type::Cut,
+            a: (first.a + second.a) % N_CARDS,
+        }];
+    }
+    if first.t == Type::DealInc && second.t == Type::DealInc {
+        return vec![Op {
+            t: Type::DealInc,
+            a: (first.a * second.a) % N_CARDS,
+        }];
     } else {
         return vec![*first, *second];
     }
@@ -296,11 +400,11 @@ fn sort(a: &mut Vec<Op>) {
     while swapped {
         swapped = false;
         let mut new_a = Vec::new();
-        
+
         let mut i = 0;
         while i < a.len() - 1 {
             let (sw, next) = swap(&a[i], &a[i + 1]);
-            
+
             if !sw {
                 new_a.push(a[i]);
                 i += 1;
@@ -317,7 +421,7 @@ fn sort(a: &mut Vec<Op>) {
             new_a.push(a[i]);
             i += 1;
         }
-        
+
         *a = new_a;
     }
 }
