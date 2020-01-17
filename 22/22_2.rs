@@ -138,8 +138,8 @@ fn main() {
         "deal into new stack",
     ];
 
-    //let mut cmds = parse(&commands);
-    let mut cmds = parse(&commands_tmp);
+    let mut cmds = parse(&_commands);
+    //let mut cmds = parse(&commands_tmp);
     display(&cmds);
     try_it(&cmds);
     sort(&mut cmds);
@@ -252,10 +252,10 @@ fn collapse(a: &mut Vec<Op>) {
         return;
     }
 
-    //let deal_inc = merge_deal_inc(&a);
-    let deal_inc = copy_all(&a, Type::DealInc);
-    //let cut = merge_cut(&a);
-    let cut = copy_all(&a, Type::Cut);
+    let deal_inc = merge_deal_inc(&a);
+    //let deal_inc = copy_all(&a, Type::DealInc);
+    let cut = merge_cut(&a);
+    //let cut = copy_all(&a, Type::Cut);
     let deal_new = merge_deal_new(&a);
     //let deal_new = copy_all(&a, Type::DealNew);
     
@@ -341,6 +341,7 @@ fn merge_deal_inc(a: &Vec<Op>) -> Vec<Op> {
     }
 
     let mut current = a[i];
+    i += 1;
 
     while i < a.len() && a[i].t == Type::DealInc {
         current = Op {
@@ -365,6 +366,7 @@ fn merge_cut(a: &Vec<Op>) -> Vec<Op> {
     }
 
     let mut current = a[i];
+    i += 1;
 
     while i < a.len() && a[i].t == Type::Cut {
         current = Op {
