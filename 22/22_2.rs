@@ -16,7 +16,7 @@ struct Op {
 const N_CARDS: i32 = 10007;
 
 fn main() {
-    let _commands = [
+    let commands = [
         "cut -7812",
         "deal with increment 55",
         "cut -3909",
@@ -119,27 +119,7 @@ fn main() {
         "cut -5914",
     ];
 
-    let commands_tmp = [
-        "cut -7812",
-        "deal with increment 55",
-        "cut -3909",
-        "deal with increment 51",
-        "deal into new stack",
-        "deal with increment 4",
-        "cut -77",
-        "deal with increment 26",
-        "deal into new stack",
-        "deal with increment 36",
-        "cut 5266",
-        "deal with increment 20",
-        "cut 8726",
-        "deal with increment 22",
-        "cut 4380",
-        "deal into new stack",
-    ];
-
-    let mut cmds = parse(&_commands);
-    //let mut cmds = parse(&commands_tmp);
+    let mut cmds = parse(&commands);
     display(&cmds);
     try_it(&cmds);
     sort(&mut cmds);
@@ -253,12 +233,9 @@ fn collapse(a: &mut Vec<Op>) {
     }
 
     let deal_inc = merge_deal_inc(&a);
-    //let deal_inc = copy_all(&a, Type::DealInc);
     let cut = merge_cut(&a);
-    //let cut = copy_all(&a, Type::Cut);
     let deal_new = merge_deal_new(&a);
-    //let deal_new = copy_all(&a, Type::DealNew);
-    
+
     let mut result = Vec::new();
     for i in deal_inc.iter() {
         result.push(*i);
@@ -270,45 +247,6 @@ fn collapse(a: &mut Vec<Op>) {
         result.push(*i);
     }
     *a = result;
-
-    /*
-
-    let mut result = Vec::new();
-    let mut current = a[0];
-    let mut i = 1;
-    while i < a.len() {
-        if current.t == Type::DealNew && a[i].t == Type::DealNew {
-            i += 2;
-            if i >= a.len() {
-                *a = result;
-                return;
-            } else {
-                current = a[i];
-                i += 1;
-            }
-        } else if current.t == a[i].t {
-            let m = merge(&current, &a[i]);
-            current = m[0];
-            i += 1;
-        } else {
-            result.push(current);
-            current = a[i];
-            i += 1;
-        }
-    }
-    result.push(current);
-    *a = result;*/
-}
-
-fn copy_all(a: &Vec<Op>, t: Type) -> Vec<Op> {
-    let mut result = Vec::new();
-    
-    for i in a.iter() {
-        if i.t == t {
-            result.push(*i);
-        }
-    }
-    return result;
 }
 
 fn merge_deal_new(a: &Vec<Op>) -> Vec<Op> {
@@ -376,25 +314,6 @@ fn merge_cut(a: &Vec<Op>) -> Vec<Op> {
         i += 1;
     }
     return vec![current];
-}
-
-fn merge(first: &Op, second: &Op) -> Vec<Op> {
-    if first.t == Type::DealNew && second.t == Type::DealNew {
-        return vec![];
-    } else if first.t == Type::Cut && second.t == Type::Cut {
-        return vec![Op {
-            t: Type::Cut,
-            a: (first.a + second.a) % N_CARDS,
-        }];
-    }
-    if first.t == Type::DealInc && second.t == Type::DealInc {
-        return vec![Op {
-            t: Type::DealInc,
-            a: (first.a * second.a) % N_CARDS,
-        }];
-    } else {
-        return vec![*first, *second];
-    }
 }
 
 fn sort(a: &mut Vec<Op>) {
