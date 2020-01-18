@@ -142,8 +142,9 @@ fn main() {
 
     cmds = doubles[0].clone();
     let mut i: usize = 1;
-    while num::pow(2_i128, i) < N_SHUFFLES {
-        if N_SHUFFLES & num::pow(2_i128, i) != 0 {
+    let goal = N_CARDS - N_SHUFFLES - 1;
+    while num::pow(2_i128, i) < goal {
+        if goal & num::pow(2_i128, i) != 0 {
             let mut tmp = cmds.clone();
             for c in doubles[i].iter() {
                 tmp.push(*c);
@@ -157,6 +158,23 @@ fn main() {
     
     println!("All combined:");
     display(&cmds);
+    
+    let mut pos = 2020_i128;
+    for s in cmds.iter() {
+        if s.t == Type::DealInc {
+            pos = (pos * s.a) % N_CARDS;
+        } else if s.t == Type::Cut {
+            if pos < s.a {
+                pos += (N_CARDS - s.a);
+            } else {
+                pos -= s.a;
+            }
+        } else if s.t == Type::DealNew {
+            pos = N_CARDS - 1 - pos;
+        }
+    }
+    
+    println!("Result: {}", pos);
 }
 
 fn to_str(op: &Op) -> String {
